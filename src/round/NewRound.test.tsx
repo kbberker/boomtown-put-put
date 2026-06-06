@@ -1,8 +1,21 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import { NewRound } from './NewRound'
 import { loadRound } from './roundModel'
+
+function renderNewRound() {
+  render(
+    <MemoryRouter initialEntries={['/new-round']}>
+      <Routes>
+        <Route path="/" element={<div>HOME</div>} />
+        <Route path="/new-round" element={<NewRound />} />
+        <Route path="/scorecard" element={<div>SCORECARD</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
 
 function playerInputs() {
   return screen.getAllByLabelText(/player name/i) as HTMLInputElement[]
@@ -10,7 +23,7 @@ function playerInputs() {
 
 describe('NewRound', () => {
   it('starts with pre-filled, editable Player names', () => {
-    render(<NewRound onStart={() => {}} />)
+    renderNewRound()
     const inputs = playerInputs()
     expect(inputs.length).toBeGreaterThanOrEqual(1)
     expect(inputs[0]).toHaveValue('Player 1')
@@ -18,7 +31,7 @@ describe('NewRound', () => {
 
   it('adds Players up to a roster of 6, pre-filling each new name', async () => {
     const user = userEvent.setup()
-    render(<NewRound onStart={() => {}} />)
+    renderNewRound()
 
     const add = screen.getByRole('button', { name: /add player/i })
     while (playerInputs().length < 6) {
@@ -32,12 +45,11 @@ describe('NewRound', () => {
 
   it('removes Players down to a roster of 1', async () => {
     const user = userEvent.setup()
-    render(<NewRound onStart={() => {}} />)
+    renderNewRound()
 
     while (playerInputs().length > 1) {
-      const rows = screen.getAllByRole('listitem')
-      const lastRow = rows[rows.length - 1]
-      await user.click(within(lastRow).getByRole('button', { name: /remove/i }))
+      const removeButtons = screen.getAllByRole('button', { name: /remove/i })
+      await user.click(removeButtons[removeButtons.length - 1])
     }
     expect(playerInputs()).toHaveLength(1)
     // Cannot drop below a single Player.
@@ -46,8 +58,7 @@ describe('NewRound', () => {
 
   it('starts a Round with the edited roster, allowing duplicate names', async () => {
     const user = userEvent.setup()
-    const onStart = vi.fn()
-    render(<NewRound onStart={onStart} />)
+    renderNewRound()
 
     const inputs = playerInputs()
     await user.clear(inputs[0])
@@ -59,18 +70,27 @@ describe('NewRound', () => {
 
     const round = loadRound()
     expect(round?.players.map((p) => p.name)).toEqual(['Sam', 'Sam'])
-    expect(onStart).toHaveBeenCalledOnce()
+    expect(screen.getByText('SCORECARD')).toBeInTheDocument()
+  })
+
+  it('returns home without creating a Round when Back is clicked', async () => {
+    const user = userEvent.setup()
+    renderNewRound()
+
+    await user.click(screen.getByRole('button', { name: /back to home/i }))
+
+    expect(screen.getByText('HOME')).toBeInTheDocument()
+    expect(loadRound()).toBeNull()
   })
 
   it('blocks Start and does not create a Round when a name is empty', async () => {
     const user = userEvent.setup()
-    const onStart = vi.fn()
-    render(<NewRound onStart={onStart} />)
+    renderNewRound()
 
     await user.clear(playerInputs()[0])
     await user.click(screen.getByRole('button', { name: /start round/i }))
 
-    expect(onStart).not.toHaveBeenCalled()
+    expect(screen.queryByText('SCORECARD')).toBeNull()
     expect(loadRound()).toBeNull()
     expect(screen.getByRole('alert')).toBeInTheDocument()
   })

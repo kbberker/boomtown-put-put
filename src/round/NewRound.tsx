@@ -1,9 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { createRound, saveRound, MIN_PLAYERS, MAX_PLAYERS } from './roundModel'
-
-type NewRoundProps = {
-  onStart: () => void
-}
 
 const INITIAL_PLAYER_COUNT = 2
 
@@ -20,7 +17,8 @@ function initialNames(): string[] {
  * pre-filled, editable names (duplicates allowed), then starts. Starting locks
  * the roster into a fresh Round and persists it as the active Round.
  */
-export function NewRound({ onStart }: NewRoundProps) {
+export function NewRound() {
+  const navigate = useNavigate()
   const [names, setNames] = useState<string[]>(initialNames)
   const [error, setError] = useState<string | null>(null)
 
@@ -50,12 +48,15 @@ export function NewRound({ onStart }: NewRoundProps) {
       return
     }
     saveRound(createRound(names))
-    onStart()
+    navigate('/scorecard')
   }
 
   return (
     <section>
       <header>
+        <button type="button" onClick={() => navigate('/')}>
+          Back to Home
+        </button>
         <h1>New Round</h1>
         <button type="button" onClick={handleStart}>
           Start Round
@@ -64,9 +65,10 @@ export function NewRound({ onStart }: NewRoundProps) {
 
       {error && <p role="alert">{error}</p>}
 
-      <ol>
+      <fieldset>
+        <legend>Players</legend>
         {names.map((name, index) => (
-          <li key={index}>
+          <div key={index}>
             <label>
               Player name
               <input
@@ -82,9 +84,9 @@ export function NewRound({ onStart }: NewRoundProps) {
                 Remove
               </button>
             )}
-          </li>
+          </div>
         ))}
-      </ol>
+      </fieldset>
 
       <button
         type="button"

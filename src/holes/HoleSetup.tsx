@@ -1,9 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { loadHoles, saveHoles, type Hole } from './holesConfig'
-
-type HoleSetupProps = {
-  onBack: () => void
-}
 
 // Editable form rows keep `par` as a string so the field can be cleared and
 // retyped freely; we convert to a number only when saving.
@@ -30,7 +27,8 @@ function isValid(draft: HoleDraft): boolean {
  * and persisted to localStorage only when the Scorekeeper confirms with Done,
  * which requires every hole to have a name and a par of at least 1.
  */
-export function HoleSetup({ onBack }: HoleSetupProps) {
+export function HoleSetup() {
+  const navigate = useNavigate()
   const [drafts, setDrafts] = useState<HoleDraft[]>(() =>
     loadHoles().map(toDraft),
   )
@@ -48,7 +46,7 @@ export function HoleSetup({ onBack }: HoleSetupProps) {
       return
     }
     saveHoles(drafts.map((d) => ({ name: d.name.trim(), par: parsePar(d.par) })))
-    onBack()
+    navigate('/')
   }
 
   return (
@@ -62,9 +60,10 @@ export function HoleSetup({ onBack }: HoleSetupProps) {
 
       {error && <p role="alert">{error}</p>}
 
-      <ol>
+      <fieldset>
+        <legend>Holes</legend>
         {drafts.map((draft, index) => (
-          <li key={index}>
+          <div key={index}>
             <label>
               Hole name
               <input
@@ -87,9 +86,9 @@ export function HoleSetup({ onBack }: HoleSetupProps) {
                 onChange={(e) => updateHole(index, { par: e.target.value })}
               />
             </label>
-          </li>
+          </div>
         ))}
-      </ol>
+      </fieldset>
     </section>
   )
 }
