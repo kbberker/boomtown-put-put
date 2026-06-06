@@ -15,6 +15,18 @@ describe('Home', () => {
     ).toBeInTheDocument()
   })
 
+  it('links to the New Round route', () => {
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('link', { name: /new round/i })).toHaveAttribute(
+      'href',
+      '/new-round',
+    )
+  })
+
   it('links to the Hole Setup route', () => {
     render(
       <MemoryRouter>

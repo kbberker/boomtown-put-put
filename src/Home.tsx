@@ -5,7 +5,10 @@ export function Home() {
   return (
     <section>
       <h1>Boomtown Putt Putt</h1>
-      <Link to="/holes">Hole Setup</Link>
+      <nav>
+        <Link to="/new-round">New Round</Link>
+        <Link to="/holes">Hole Setup</Link>
+      </nav>
     </section>
   )
 }
