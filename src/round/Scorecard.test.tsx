@@ -1,8 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { Scorecard } from './Scorecard'
-import { createRound, saveRound } from './roundModel'
+import { createRound, saveRound, setScore } from './roundModel'
 import { saveHoles, defaultHoles, HOLE_COUNT } from '../holes/holesConfig'
+
+function renderScorecard() {
+  render(
+    <MemoryRouter>
+      <Scorecard />
+    </MemoryRouter>,
+  )
+}
 
 describe('Scorecard', () => {
   it('renders the 9 configured Holes as columns with name and par', () => {
@@ -11,7 +20,7 @@ describe('Scorecard', () => {
     saveHoles(holes)
     saveRound(createRound(['Alice']))
 
-    render(<Scorecard />)
+    renderScorecard()
 
     const headers = screen.getAllByRole('columnheader')
     // Player + 9 Holes + Total
@@ -25,7 +34,7 @@ describe('Scorecard', () => {
     saveHoles(defaultHoles())
     saveRound(createRound(['Alice', 'Bob']))
 
-    render(<Scorecard />)
+    renderScorecard()
 
     expect(screen.getByRole('rowheader', { name: 'Alice' })).toBeInTheDocument()
     expect(screen.getByRole('rowheader', { name: 'Bob' })).toBeInTheDocument()
@@ -35,7 +44,7 @@ describe('Scorecard', () => {
     saveHoles(defaultHoles())
     saveRound(createRound(['Alice', 'Bob']))
 
-    render(<Scorecard />)
+    renderScorecard()
 
     const blanks = screen.getAllByLabelText(/not yet entered/i)
     expect(blanks).toHaveLength(2 * HOLE_COUNT)
@@ -45,16 +54,57 @@ describe('Scorecard', () => {
     saveHoles(defaultHoles())
     saveRound(createRound(['Alice', 'Bob']))
 
-    render(<Scorecard />)
+    renderScorecard()
 
     const aliceRow = screen.getByRole('row', { name: /alice/i })
     expect(within(aliceRow).getByRole('cell', { name: 'Total: 0' }))
       .toBeInTheDocument()
   })
 
+  it('reflects entered Scores and recomputed Totals', () => {
+    saveHoles(defaultHoles())
+    let round = createRound(['Alice'])
+    round = setScore(round, 0, 0, 3)
+    round = setScore(round, 0, 1, 2)
+    saveRound(round)
+
+    renderScorecard()
+
+    const aliceRow = screen.getByRole('row', { name: /alice/i })
+    expect(within(aliceRow).getByRole('cell', { name: 'Total: 5' }))
+      .toBeInTheDocument()
+  })
+
+  it('links each Hole header to its Hole Entry Page', () => {
+    const holes = defaultHoles()
+    holes[0] = { name: 'The Windmill', par: 4 }
+    saveHoles(holes)
+    saveRound(createRound(['Alice']))
+
+    renderScorecard()
+
+    expect(
+      screen.getByRole('link', { name: /the windmill/i }),
+    ).toHaveAttribute('href', '/hole/0')
+  })
+
+  it('shows each Hole as scored once every Player has a Score, else not yet', () => {
+    saveHoles(defaultHoles())
+    // Alice scored on Hole 1 only; Hole 2 is still blank.
+    saveRound(setScore(createRound(['Alice']), 0, 0, 3))
+
+    renderScorecard()
+
+    const scored = screen.getByRole('columnheader', { name: /hole 1\b/i })
+    expect(within(scored).getByText(/scored/i)).toBeInTheDocument()
+
+    const notYet = screen.getByRole('columnheader', { name: /hole 2\b/i })
+    expect(within(notYet).getByText(/not yet/i)).toBeInTheDocument()
+  })
+
   it('shows a message when there is no active Round', () => {
     saveHoles(defaultHoles())
-    render(<Scorecard />)
+    renderScorecard()
     expect(screen.getByText(/no active round/i)).toBeInTheDocument()
   })
 })

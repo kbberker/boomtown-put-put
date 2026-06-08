@@ -1,10 +1,13 @@
-import { loadRound, totalFor } from './roundModel'
+import { Link } from 'react-router'
+import { loadRound, totalFor, isHoleScored } from './roundModel'
 import { loadHoles } from '../holes/holesConfig'
 
 /**
  * The Scorecard: the read-only hub for the active Round. Players are rows and
  * the 9 configured Holes are columns, using each Hole's name and par. Cells with
  * no Score show as "not yet entered" and each Player's running Total is shown.
+ * Each Hole header links to its Hole Entry Page and shows whether the Hole is
+ * fully scored or not yet entered; Holes may be entered in any order.
  */
 export function Scorecard() {
   const round = loadRound()
@@ -26,11 +29,19 @@ export function Scorecard() {
         <thead>
           <tr>
             <th scope="col">Player</th>
-            {holes.map((hole, index) => (
-              <th key={index} scope="col">
-                {hole.name} (Par {hole.par})
-              </th>
-            ))}
+            {holes.map((hole, index) => {
+              const scored = isHoleScored(round, index)
+              return (
+                <th key={index} scope="col">
+                  <Link to={`/hole/${index}`}>
+                    {hole.name} (Par {hole.par})
+                  </Link>{' '}
+                  <span aria-label={scored ? 'fully scored' : 'not yet scored'}>
+                    {scored ? 'Scored' : 'Not yet'}
+                  </span>
+                </th>
+              )
+            })}
             <th scope="col">Total</th>
           </tr>
         </thead>
