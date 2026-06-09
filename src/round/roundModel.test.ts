@@ -3,8 +3,12 @@ import {
   createRound,
   loadRound,
   saveRound,
+  clearRound,
   setScore,
   isHoleScored,
+  isRoundComplete,
+  unscoredHoleCount,
+  rankPlayers,
   totalFor,
   MIN_PLAYERS,
   MAX_PLAYERS,
@@ -100,5 +104,71 @@ describe('roundModel', () => {
   it('returns null when the stored Round is corrupt', () => {
     localStorage.setItem('putt-putt:round', 'not json')
     expect(loadRound()).toBeNull()
+  })
+
+  it('clears the active Round so a later load finds none', () => {
+    saveRound(createRound(['Alice']))
+    clearRound()
+    expect(loadRound()).toBeNull()
+  })
+
+  // Score every Player on every Hole so the Round counts as complete.
+  function fullyScored(names: string[]): ReturnType<typeof createRound> {
+    let round = createRound(names)
+    round.players.forEach((_, p) => {
+      for (let h = 0; h < HOLE_COUNT; h++) {
+        round = setScore(round, p, h, 2)
+      }
+    })
+    return round
+  }
+
+  it('reports a Round complete only when every Player scored every Hole', () => {
+    let round = createRound(['Alice', 'Bob'])
+    expect(isRoundComplete(round)).toBe(false)
+    round = setScore(round, 0, 0, 3)
+    expect(isRoundComplete(round)).toBe(false)
+    expect(isRoundComplete(fullyScored(['Alice', 'Bob']))).toBe(true)
+  })
+
+  it('counts Holes that are not yet fully scored', () => {
+    let round = createRound(['Alice', 'Bob'])
+    expect(unscoredHoleCount(round)).toBe(HOLE_COUNT)
+    // Only Alice scored on Hole 1, so it still counts as unscored.
+    round = setScore(round, 0, 0, 3)
+    expect(unscoredHoleCount(round)).toBe(HOLE_COUNT)
+    round = setScore(round, 1, 0, 2)
+    expect(unscoredHoleCount(round)).toBe(HOLE_COUNT - 1)
+    expect(unscoredHoleCount(fullyScored(['Alice', 'Bob']))).toBe(0)
+  })
+
+  it('ranks Players by ascending Total', () => {
+    let round = createRound(['Alice', 'Bob'])
+    round = setScore(round, 0, 0, 5) // Alice total 5
+    round = setScore(round, 1, 0, 2) // Bob total 2
+    const ranked = rankPlayers(round)
+    expect(ranked.map((r) => r.player.name)).toEqual(['Bob', 'Alice'])
+    expect(ranked.map((r) => r.total)).toEqual([2, 5])
+  })
+
+  it('declares the lowest Total the Winner in a complete Round', () => {
+    let round = fullyScored(['Alice', 'Bob'])
+    round = setScore(round, 1, 0, 1) // Bob one stroke better
+    const ranked = rankPlayers(round)
+    expect(ranked[0].player.name).toBe('Bob')
+    expect(ranked[0].isWinner).toBe(true)
+    expect(ranked[1].isWinner).toBe(false)
+  })
+
+  it('declares co-Winners on a tie with no tiebreaker', () => {
+    const round = fullyScored(['Alice', 'Bob']) // identical Scores -> tie
+    const winners = rankPlayers(round).filter((r) => r.isWinner)
+    expect(winners.map((r) => r.player.name).sort()).toEqual(['Alice', 'Bob'])
+  })
+
+  it('declares no Winner while the Round is incomplete', () => {
+    let round = createRound(['Alice', 'Bob'])
+    round = setScore(round, 0, 0, 1) // lowest, but Round not complete
+    expect(rankPlayers(round).every((r) => !r.isWinner)).toBe(true)
   })
 })
