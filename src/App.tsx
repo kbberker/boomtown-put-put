@@ -5,7 +5,6 @@ import { NewRound } from './round/NewRound'
 import { HoleEntry } from './round/HoleEntry'
 import { Scorecard } from './round/Scorecard'
 import { Results } from './round/Results'
-import './App.css'
 
 function App() {
   return (

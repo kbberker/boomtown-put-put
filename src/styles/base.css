@@ -1,0 +1,118 @@
+/*
+ * Global base layer (ADR-0002).
+ *
+ * Role split: this file owns design tokens, a minimal reset, and
+ * semantic-element defaults. Component-specific layout lives in co-located
+ * CSS Modules. Everything here is wrapped in `@layer base` so component
+ * styles (unlayered) always win the cascade without specificity battles.
+ *
+ * Token values, the reset, and element defaults are working PLACEHOLDERS.
+ * The real palette, spacing scale, and dark mode are a deferred design task.
+ */
+
+@layer base {
+  :root {
+    /* Neutral light placeholder palette — not the final design. */
+    --color-bg: #ffffff;
+    --color-surface: #f5f5f5;
+    --color-text: #1a1a1a;
+    --color-muted: #555555;
+    --color-border: #d4d4d4;
+    --color-accent: #2563eb;
+    --color-accent-text: #ffffff;
+    --color-invalid: #b91c1c;
+
+    /* Spacing + sizing placeholders. */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --space-5: 2rem;
+    --radius: 0.375rem;
+    --content-max: 40rem;
+
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    color-scheme: light;
+    color: var(--color-text);
+    background: var(--color-bg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  /* Minimal reset. */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+  }
+
+  /* Mobile-first container: fluid below the cap, centred on wide viewports. */
+  #root {
+    width: 100%;
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding: var(--space-4) var(--space-3);
+  }
+
+  /* Semantic-element defaults. */
+  h1,
+  h2,
+  h3 {
+    margin: 0 0 var(--space-3);
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  p {
+    margin: 0 0 var(--space-3);
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  /* Form controls + buttons inherit typography and share a baseline look. */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg);
+  }
+
+  :is(input, select, textarea)[aria-invalid='true'] {
+    border-color: var(--color-invalid);
+  }
+
+  button {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  [role='alert'] {
+    color: var(--color-invalid);
+  }
+}
