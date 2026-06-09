@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import { NewRound } from './NewRound'
-import { loadRound } from './roundModel'
+import { createRound, loadRound, saveRound } from './roundModel'
 
 function renderNewRound() {
   render(
@@ -22,6 +22,10 @@ function playerInputs() {
 }
 
 describe('NewRound', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('starts with pre-filled, editable Player names', () => {
     renderNewRound()
     const inputs = playerInputs()
@@ -93,5 +97,46 @@ describe('NewRound', () => {
     expect(screen.queryByText('SCORECARD')).toBeNull()
     expect(loadRound()).toBeNull()
     expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+
+  it('confirms before discarding a Round in progress, then replaces it', async () => {
+    const user = userEvent.setup()
+    saveRound(createRound(['Old Player']))
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderNewRound()
+
+    await user.click(screen.getByRole('button', { name: /start round/i }))
+
+    expect(confirm).toHaveBeenCalledWith(
+      'This discards your round in progress. Start new?',
+    )
+    expect(loadRound()?.players.map((p) => p.name)).toEqual([
+      'Player 1',
+      'Player 2',
+    ])
+    expect(screen.getByText('SCORECARD')).toBeInTheDocument()
+  })
+
+  it('keeps the Round in progress when the discard is cancelled', async () => {
+    const user = userEvent.setup()
+    saveRound(createRound(['Old Player']))
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    renderNewRound()
+
+    await user.click(screen.getByRole('button', { name: /start round/i }))
+
+    expect(loadRound()?.players.map((p) => p.name)).toEqual(['Old Player'])
+    expect(screen.queryByText('SCORECARD')).toBeNull()
+  })
+
+  it('does not confirm when no Round is in progress', async () => {
+    const user = userEvent.setup()
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderNewRound()
+
+    await user.click(screen.getByRole('button', { name: /start round/i }))
+
+    expect(confirm).not.toHaveBeenCalled()
+    expect(screen.getByText('SCORECARD')).toBeInTheDocument()
   })
 })

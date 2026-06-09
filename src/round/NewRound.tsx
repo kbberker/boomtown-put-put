@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { createRound, saveRound, MIN_PLAYERS, MAX_PLAYERS } from './roundModel'
+import {
+  createRound,
+  loadRound,
+  saveRound,
+  MIN_PLAYERS,
+  MAX_PLAYERS,
+} from './roundModel'
+
+const DISCARD_PROMPT = 'This discards your round in progress. Start new?'
 
 const INITIAL_PLAYER_COUNT = 2
 
@@ -45,6 +53,11 @@ export function NewRound() {
   function handleStart() {
     if (!names.every((n) => n.trim() !== '')) {
       setError('Every Player needs a name.')
+      return
+    }
+    // Only one Round is active at a time (ADR-0001). If one is in progress,
+    // starting overwrites it, so confirm before discarding it.
+    if (loadRound() !== null && !window.confirm(DISCARD_PROMPT)) {
       return
     }
     saveRound(createRound(names))
