@@ -2,8 +2,8 @@
 
 Issues and PRDs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
 
-> Note: this repo does not yet have a git remote. Run `git init`, create a GitHub
-> repo, and push before these conventions can create real issues.
+> The repo's git remote is `origin` → `kbberker/boomtown-put-put`. `gh` infers it
+> automatically when run inside the clone.
 
 ## Conventions
 
