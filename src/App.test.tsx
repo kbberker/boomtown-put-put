@@ -56,4 +56,40 @@ describe('App navigation', () => {
       screen.getByRole('rowheader', { name: 'Player 2' }),
     ).toBeInTheDocument()
   })
+
+  it('preserves an in-progress Round across a reload and resumes with Scores intact', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    // Start a Round and enter Scores on the first Hole.
+    await user.click(screen.getByRole('link', { name: /new round/i }))
+    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await user.click(screen.getAllByRole('link')[0])
+    await user.type(screen.getByLabelText('Player 1'), '3')
+    await user.type(screen.getByLabelText('Player 2'), '5')
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    // Simulate a browser reload: tear down and mount the app fresh from Home.
+    // localStorage survives, so the active Round should still be there.
+    unmount()
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    // Home surfaces Resume Round; resuming returns to the Scorecard.
+    await user.click(screen.getByRole('link', { name: /resume round/i }))
+    expect(
+      screen.getByRole('heading', { name: /scorecard/i }),
+    ).toBeInTheDocument()
+
+    // The entered Scores survived the reload (Totals reflect them).
+    expect(screen.getByLabelText('Total: 3')).toBeInTheDocument()
+    expect(screen.getByLabelText('Total: 5')).toBeInTheDocument()
+  })
 })
