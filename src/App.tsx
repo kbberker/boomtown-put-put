@@ -4,6 +4,7 @@ import { HoleSetup } from './holes/HoleSetup'
 import { NewRound } from './round/NewRound'
 import { HoleEntry } from './round/HoleEntry'
 import { Scorecard } from './round/Scorecard'
+import { Results } from './round/Results'
 import './App.css'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <Route path="/holes" element={<HoleSetup />} />
       <Route path="/new-round" element={<NewRound />} />
       <Route path="/scorecard" element={<Scorecard />} />
+      <Route path="/results" element={<Results />} />
       <Route path="/hole/:holeIndex" element={<HoleEntry />} />
     </Routes>
   )
