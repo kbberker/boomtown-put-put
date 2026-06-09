@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import { Scorecard } from './Scorecard'
 import { createRound, saveRound, setScore } from './roundModel'
 import { saveHoles, defaultHoles, HOLE_COUNT } from '../holes/holesConfig'
@@ -11,6 +12,27 @@ function renderScorecard() {
       <Scorecard />
     </MemoryRouter>,
   )
+}
+
+// A routed render so we can assert that finishing lands on the Results screen.
+function renderScorecardRouted() {
+  render(
+    <MemoryRouter initialEntries={['/scorecard']}>
+      <Routes>
+        <Route path="/scorecard" element={<Scorecard />} />
+        <Route path="/results" element={<div>RESULTS</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+// Score every Player on every Hole so the Round counts as complete.
+function fullyScoredRound(names: string[]) {
+  let round = createRound(names)
+  round.players.forEach((_, p) => {
+    for (let h = 0; h < HOLE_COUNT; h++) round = setScore(round, p, h, 2)
+  })
+  return round
 }
 
 describe('Scorecard', () => {
@@ -106,5 +128,61 @@ describe('Scorecard', () => {
     saveHoles(defaultHoles())
     renderScorecard()
     expect(screen.getByText(/no active round/i)).toBeInTheDocument()
+  })
+
+  describe('Finish Round', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('always offers a Finish Round action', () => {
+      saveHoles(defaultHoles())
+      saveRound(createRound(['Alice']))
+      renderScorecard()
+      expect(
+        screen.getByRole('button', { name: /finish round/i }),
+      ).toBeInTheDocument()
+    })
+
+    it('soft-warns about blank Holes but proceeds to Results when confirmed', async () => {
+      const user = userEvent.setup()
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+      saveHoles(defaultHoles())
+      // Only Hole 1 scored, so 8 Holes are still blank.
+      saveRound(setScore(createRound(['Alice']), 0, 0, 3))
+      renderScorecardRouted()
+
+      await user.click(screen.getByRole('button', { name: /finish round/i }))
+
+      expect(confirm).toHaveBeenCalledWith(
+        expect.stringMatching(/8 holes still blank/i),
+      )
+      expect(screen.getByText('RESULTS')).toBeInTheDocument()
+    })
+
+    it('stays on the Scorecard when the blank-Holes warning is dismissed', async () => {
+      const user = userEvent.setup()
+      vi.spyOn(window, 'confirm').mockReturnValue(false)
+      saveHoles(defaultHoles())
+      saveRound(createRound(['Alice']))
+      renderScorecardRouted()
+
+      await user.click(screen.getByRole('button', { name: /finish round/i }))
+
+      expect(screen.queryByText('RESULTS')).not.toBeInTheDocument()
+    })
+
+    it('finishes a complete Round straight to Results without warning', async () => {
+      const user = userEvent.setup()
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+      saveHoles(defaultHoles())
+      saveRound(fullyScoredRound(['Alice', 'Bob']))
+      renderScorecardRouted()
+
+      await user.click(screen.getByRole('button', { name: /finish round/i }))
+
+      expect(confirm).not.toHaveBeenCalled()
+      expect(screen.getByText('RESULTS')).toBeInTheDocument()
+    })
   })
 })

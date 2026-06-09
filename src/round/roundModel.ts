@@ -76,9 +76,50 @@ export function totalFor(player: Player): number {
   return player.scores.reduce<number>((sum, score) => sum + (score ?? 0), 0)
 }
 
+/** A Round is complete once every Player has a Score on every Hole. */
+export function isRoundComplete(round: Round): boolean {
+  return round.players.every((player) => player.scores.every((s) => s !== null))
+}
+
+/** How many Holes are not yet fully scored (used to soft-warn before finishing). */
+export function unscoredHoleCount(round: Round): number {
+  let count = 0
+  for (let holeIndex = 0; holeIndex < HOLE_COUNT; holeIndex++) {
+    if (!isHoleScored(round, holeIndex)) count++
+  }
+  return count
+}
+
+// A Player's final standing: their Total and whether they are a Winner. Only a
+// complete Round can declare a Winner; ties on the lowest Total yield co-Winners.
+export type RankedPlayer = {
+  player: Player
+  total: number
+  isWinner: boolean
+}
+
+/**
+ * Rank the roster by ascending Total (lowest first; original order breaks ties).
+ * The lowest-Total Player(s) are flagged as Winner, but only in a complete Round
+ * — an incomplete Round that was finished early has no Winner.
+ */
+export function rankPlayers(round: Round): RankedPlayer[] {
+  const ranked = round.players
+    .map((player) => ({ player, total: totalFor(player), isWinner: false }))
+    .sort((a, b) => a.total - b.total)
+  const complete = isRoundComplete(round)
+  const lowest = ranked.length > 0 ? ranked[0].total : 0
+  return ranked.map((r) => ({ ...r, isWinner: complete && r.total === lowest }))
+}
+
 /** Persist the active Round, replacing any previous one. */
 export function saveRound(round: Round): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(round))
+}
+
+/** Clear the active Round (e.g. after finishing), leaving none stored. */
+export function clearRound(): void {
+  localStorage.removeItem(STORAGE_KEY)
 }
 
 /** Load the active Round, or null if none is stored or the data is corrupt. */

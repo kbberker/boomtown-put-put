@@ -1,5 +1,10 @@
-import { Link } from 'react-router'
-import { loadRound, totalFor, isHoleScored } from './roundModel'
+import { Link, useNavigate } from 'react-router'
+import {
+  loadRound,
+  totalFor,
+  isHoleScored,
+  unscoredHoleCount,
+} from './roundModel'
 import { loadHoles } from '../holes/holesConfig'
 
 /**
@@ -10,8 +15,24 @@ import { loadHoles } from '../holes/holesConfig'
  * fully scored or not yet entered; Holes may be entered in any order.
  */
 export function Scorecard() {
+  const navigate = useNavigate()
   const round = loadRound()
   const holes = loadHoles()
+
+  // Finishing is always available — backyard Rounds get abandoned mid-course.
+  // If Holes are still blank we soft-warn rather than hard-block; the Results
+  // screen handles an incomplete Round by declaring no Winner.
+  function handleFinish() {
+    if (!round) return
+    const blank = unscoredHoleCount(round)
+    if (blank > 0) {
+      const noun = blank === 1 ? 'Hole' : 'Holes'
+      if (!window.confirm(`${blank} ${noun} still blank — finish anyway?`)) {
+        return
+      }
+    }
+    navigate('/results')
+  }
 
   if (!round) {
     return (
@@ -24,7 +45,12 @@ export function Scorecard() {
 
   return (
     <section>
-      <h1>Scorecard</h1>
+      <header>
+        <h1>Scorecard</h1>
+        <button type="button" onClick={handleFinish}>
+          Finish Round
+        </button>
+      </header>
       <table>
         <thead>
           <tr>
