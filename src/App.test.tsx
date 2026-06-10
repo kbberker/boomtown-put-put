@@ -69,9 +69,11 @@ describe('App navigation', () => {
     await user.click(screen.getByRole('link', { name: /new round/i }))
     await user.click(screen.getByRole('button', { name: /tee off/i }))
     await user.click(screen.getAllByRole('link')[0])
-    await user.type(screen.getByLabelText('Player 1'), '3')
-    await user.type(screen.getByLabelText('Player 2'), '5')
-    await user.click(screen.getByRole('button', { name: /save/i }))
+    const plus = (name: string) =>
+      screen.getByRole('button', { name: `Increase ${name}'s score` })
+    for (let i = 0; i < 3; i++) await user.click(plus('Player 1'))
+    for (let i = 0; i < 5; i++) await user.click(plus('Player 2'))
+    await user.click(screen.getByRole('button', { name: /save scores/i }))
 
     // Simulate a browser reload: tear down and mount the app fresh from Home.
     // localStorage survives, so the active Round should still be there.

@@ -8,29 +8,20 @@ import {
   MAX_SCORE,
   type Round,
 } from './roundModel'
-import { loadHoles } from '../holes/holesConfig'
-
-/** Parse a draft input into a valid Score (1–9 integer), or null if invalid. */
-function parseScore(raw: string): number | null {
-  if (raw.trim() === '') return null
-  const value = Number(raw)
-  if (!Number.isInteger(value)) return null
-  if (value < MIN_SCORE || value > MAX_SCORE) return null
-  return value
-}
+import { loadHoles, HOLE_COUNT } from '../holes/holesConfig'
+import { Shell } from '../ui/Shell'
+import { ScreenHeader } from '../ui/ScreenHeader'
+import { Button } from '../ui/Button'
+import styles from './HoleEntry.module.css'
 
 /**
  * The Hole Entry Page: the per-Hole screen for entering every Player's Score on
  * a single Hole. Opened from the Scorecard via /hole/:holeIndex, showing the
- * Hole's name and par as context. Each Player gets a number input for their
- * Score (1–9; 9 means picked up). The entry is a draft held in local state and
- * only persisted on Save, which requires every Player to have a valid Score and
- * then returns to the Scorecard. Re-opening a scored Hole pre-fills the existing
- * Scores.
- *
- * The score input is intentionally isolated to this screen (see the "To be
- * discussed" note in CLAUDE.md on styling); it is a plain native control for now
- * and can be swapped later without touching the score model.
+ * Hole's name and par as context. Each Player gets a stepper for their Score
+ * (1–9; 9 means picked up), so the draft is always blank or in range. The
+ * entry is held in local state and only persisted on Save, which requires
+ * every Player to have a Score and then returns to the Scorecard — no
+ * auto-advance. Re-opening a scored Hole pre-fills the existing Scores.
  */
 export function HoleEntry() {
   const navigate = useNavigate()
@@ -41,99 +32,143 @@ export function HoleEntry() {
   const holes = loadHoles()
   const hole = holes[holeIndex]
 
-  // Draft Scores for this Hole as raw input strings, one per Player, seeded from
-  // any existing Scores so re-opening a scored Hole shows the current values.
-  const [draft, setDraft] = useState<string[]>(() =>
-    round
-      ? round.players.map((p) => {
-          const score = p.scores[holeIndex]
-          return score === null || score === undefined ? '' : String(score)
-        })
-      : [],
+  // Draft Scores for this Hole, one per Player (null = not entered), seeded
+  // from any existing Scores so re-opening a scored Hole shows current values.
+  const [draft, setDraft] = useState<(number | null)[]>(() =>
+    round ? round.players.map((p) => p.scores[holeIndex] ?? null) : [],
   )
   const [error, setError] = useState<string | null>(null)
-  // Only flag invalid inputs once the Scorekeeper has attempted to Save, so a
-  // freshly opened (blank) Hole does not announce every field as invalid.
-  const [submitted, setSubmitted] = useState(false)
 
   if (!round) {
     return (
-      <section>
-        <h1>Hole Entry</h1>
-        <p>No active Round.</p>
-      </section>
+      <Shell>
+        <ScreenHeader title="Hole Entry" />
+        <p className={styles.emptyState}>No active Round.</p>
+      </Shell>
     )
   }
 
   if (!hole) {
     return (
-      <section>
-        <h1>Hole Entry</h1>
-        <p>No such Hole.</p>
-      </section>
+      <Shell>
+        <ScreenHeader title="Hole Entry" />
+        <p className={styles.emptyState}>No such Hole.</p>
+      </Shell>
     )
   }
 
-  // round/hole are narrowed to non-null above; capture so the Save closure keeps
+  // round is narrowed to non-null above; capture so the Save closure keeps
   // the narrowing.
   const activeRound = round
 
-  function updateScore(playerIndex: number, value: string) {
+  function increase(playerIndex: number) {
     setDraft((current) =>
-      current.map((s, i) => (i === playerIndex ? value : s)),
+      current.map((value, i) =>
+        i === playerIndex
+          ? value === null
+            ? MIN_SCORE
+            : Math.min(value + 1, MAX_SCORE)
+          : value,
+      ),
+    )
+  }
+
+  function decrease(playerIndex: number) {
+    setDraft((current) =>
+      current.map((value, i) =>
+        i === playerIndex && value !== null && value > MIN_SCORE
+          ? value - 1
+          : value,
+      ),
     )
   }
 
   function handleSave() {
-    setSubmitted(true)
-    const parsed = draft.map(parseScore)
-    if (parsed.some((value) => value === null)) {
+    if (draft.some((value) => value === null)) {
       setError('Every Player needs a Score from 1 to 9.')
       return
     }
     let updated: Round = activeRound
-    parsed.forEach((value, playerIndex) => {
+    draft.forEach((value, playerIndex) => {
       updated = setScore(updated, playerIndex, holeIndex, value as number)
     })
     saveRound(updated)
     navigate('/scorecard')
   }
 
+  const scored = draft.filter((value) => value !== null).length
+
   return (
-    <section>
-      <header>
-        <button type="button" onClick={() => navigate('/scorecard')}>
-          Back to Scorecard
-        </button>
-        <h1>{hole.name}</h1>
-        <p>Par {hole.par}</p>
-        <button type="button" onClick={handleSave}>
-          Save
-        </button>
-      </header>
+    <Shell>
+      <ScreenHeader
+        kicker={`Hole ${holeIndex + 1} of ${HOLE_COUNT} · Par ${hole.par}`}
+        title={hole.name}
+        back={{ to: '/scorecard', label: 'Scorecard' }}
+      />
 
-      {error && <p role="alert">{error}</p>}
+      <section className={styles.content}>
+        {error && <p role="alert">{error}</p>}
 
-      <fieldset>
-        <legend>Scores</legend>
-        {round.players.map((player, playerIndex) => (
-          <div key={playerIndex}>
-            <label>
-              {player.name}
-              <input
-                type="number"
-                min={MIN_SCORE}
-                max={MAX_SCORE}
-                required
-                inputMode="numeric"
-                aria-invalid={submitted && parseScore(draft[playerIndex]) === null}
-                value={draft[playerIndex]}
-                onChange={(e) => updateScore(playerIndex, e.target.value)}
-              />
-            </label>
-          </div>
-        ))}
-      </fieldset>
-    </section>
+        <fieldset className={styles.scores}>
+          <legend className={styles.srOnly}>Scores</legend>
+          {round.players.map((player, playerIndex) => {
+            const value = draft[playerIndex]
+            const blank = value === null
+            const pickedUp = value === MAX_SCORE
+            return (
+              <div
+                key={playerIndex}
+                role="group"
+                aria-label={player.name}
+                className={styles.playerCard}
+              >
+                <div className={styles.playerInfo}>
+                  <div className={styles.playerName}>{player.name}</div>
+                  {pickedUp && <div className={styles.pickedUp}>Picked up</div>}
+                </div>
+                <div className={styles.stepper}>
+                  <button
+                    type="button"
+                    className={`${styles.decrease} bt-press`}
+                    data-dimmed={blank || value <= MIN_SCORE}
+                    aria-label={`Decrease ${player.name}'s score`}
+                    onClick={() => decrease(playerIndex)}
+                  >
+                    −
+                  </button>
+                  <div
+                    className={styles.value}
+                    data-blank={blank}
+                    data-picked-up={pickedUp}
+                    aria-live="polite"
+                  >
+                    {value ?? '–'}
+                  </div>
+                  <button
+                    type="button"
+                    className={`${styles.increase} bt-press`}
+                    data-dimmed={pickedUp}
+                    aria-label={`Increase ${player.name}'s score`}
+                    onClick={() => increase(playerIndex)}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </fieldset>
+
+        <p className={styles.helper}>
+          {scored} of {round.players.length} scored · 9 means picked up
+        </p>
+      </section>
+
+      <div className={styles.footer}>
+        <Button big onClick={handleSave}>
+          Save Scores
+        </Button>
+      </div>
+    </Shell>
   )
 }

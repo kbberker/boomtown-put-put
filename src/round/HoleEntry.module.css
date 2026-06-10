@@ -1,0 +1,128 @@
+.content {
+  padding: 18px 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scores {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Keep the fieldset's legend for assistive tech without painting it. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.playerCard {
+  display: flex;
+  align-items: center;
+  background: var(--bt-white);
+  border-radius: var(--bt-radius-md);
+  padding: var(--bt-space-3) 14px;
+  box-shadow: var(--bt-shadow-card);
+}
+
+.playerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.playerName {
+  font-weight: 800;
+  font-size: var(--bt-text-lg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickedUp {
+  margin-top: 1px;
+  font-size: var(--bt-text-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bt-pickup);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--bt-space-3);
+}
+
+.decrease,
+.increase {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: none;
+  border-radius: var(--bt-radius-sm);
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.decrease {
+  background: var(--bt-fairway-pale);
+  color: var(--bt-fairway-deep);
+  box-shadow: 0 3px 0 rgba(21, 96, 42, 0.18);
+}
+
+.increase {
+  background: var(--bt-yellow);
+  color: var(--bt-ink);
+  box-shadow: 0 3px 0 var(--bt-yellow-deep);
+}
+
+/* At a bound the button still announces normally but reads dimmed. */
+.decrease[data-dimmed='true'],
+.increase[data-dimmed='true'] {
+  opacity: 0.35;
+}
+
+.value {
+  width: 46px;
+  text-align: center;
+  font-family: var(--bt-font-display);
+  font-size: 34px;
+  color: var(--bt-ink);
+}
+
+.value[data-blank='true'] {
+  color: var(--bt-text-faint);
+}
+
+.value[data-picked-up='true'] {
+  color: var(--bt-pickup);
+}
+
+.helper {
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--bt-text-xs);
+  color: var(--bt-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.emptyState {
+  padding: var(--bt-space-5);
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--bt-space-6) 18px var(--bt-space-8);
+}
