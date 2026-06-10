@@ -7,8 +7,11 @@ import {
   MIN_PLAYERS,
   MAX_PLAYERS,
 } from './roundModel'
-
-const DISCARD_PROMPT = 'This discards your round in progress. Start new?'
+import { Shell } from '../ui/Shell'
+import { ScreenHeader } from '../ui/ScreenHeader'
+import { Button } from '../ui/Button'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
+import styles from './NewRound.module.css'
 
 const INITIAL_PLAYER_COUNT = 2
 
@@ -22,13 +25,14 @@ function initialNames(): string[] {
 
 /**
  * The New Round flow: the Scorekeeper assembles a roster of 1–6 Players with
- * pre-filled, editable names (duplicates allowed), then starts. Starting locks
- * the roster into a fresh Round and persists it as the active Round.
+ * pre-filled, editable names (duplicates allowed), then tees off. Starting
+ * locks the roster into a fresh Round and persists it as the active Round.
  */
 export function NewRound() {
   const navigate = useNavigate()
   const [names, setNames] = useState<string[]>(initialNames)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
 
   function updateName(index: number, value: string) {
     setNames((current) => current.map((n, i) => (i === index ? value : n)))
@@ -50,64 +54,100 @@ export function NewRound() {
     )
   }
 
-  function handleStart() {
-    if (!names.every((n) => n.trim() !== '')) {
-      setError('Every Player needs a name.')
-      return
-    }
-    // Only one Round is active at a time (ADR-0001). If one is in progress,
-    // starting overwrites it, so confirm before discarding it.
-    if (loadRound() !== null && !window.confirm(DISCARD_PROMPT)) {
-      return
-    }
+  function startRound() {
     saveRound(createRound(names))
     navigate('/scorecard')
   }
 
+  function handleTeeOff() {
+    if (!names.every((n) => n.trim() !== '')) {
+      setError('Every Player needs a name.')
+      return
+    }
+    setError(null)
+    // Only one Round is active at a time (ADR-0001). If one is in progress,
+    // starting overwrites it, so confirm before discarding it.
+    if (loadRound() !== null) {
+      setConfirmDiscard(true)
+      return
+    }
+    startRound()
+  }
+
   return (
-    <section>
-      <header>
-        <button type="button" onClick={() => navigate('/')}>
-          Back to Home
-        </button>
-        <h1>New Round</h1>
-        <button type="button" onClick={handleStart}>
-          Start Round
-        </button>
-      </header>
+    <Shell>
+      <ScreenHeader
+        kicker="Assemble the group"
+        title="New Round"
+        back={{ to: '/', label: 'Home' }}
+      />
 
-      {error && <p role="alert">{error}</p>}
+      <section className={styles.content}>
+        {error && <p role="alert">{error}</p>}
 
-      <fieldset>
-        <legend>Players</legend>
-        {names.map((name, index) => (
-          <div key={index}>
-            <label>
-              Player name
+        <fieldset className={styles.players}>
+          <legend className={styles.srOnly}>Players</legend>
+          {names.map((name, index) => (
+            <div key={index} className={styles.playerCard}>
+              <span className={styles.numberTile} aria-hidden="true">
+                {index + 1}
+              </span>
               <input
                 type="text"
                 required
+                aria-label={`Player ${index + 1} name`}
                 aria-invalid={name.trim() === ''}
                 value={name}
                 onChange={(e) => updateName(index, e.target.value)}
+                onFocus={(e) => e.currentTarget.select()}
               />
-            </label>
-            {names.length > MIN_PLAYERS && (
-              <button type="button" onClick={() => removePlayer(index)}>
-                Remove
-              </button>
-            )}
-          </div>
-        ))}
-      </fieldset>
+              {names.length > MIN_PLAYERS && (
+                <button
+                  type="button"
+                  className={`${styles.remove} bt-press`}
+                  aria-label={`Remove Player ${index + 1}`}
+                  onClick={() => removePlayer(index)}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+        </fieldset>
 
-      <button
-        type="button"
-        onClick={addPlayer}
-        disabled={names.length >= MAX_PLAYERS}
-      >
-        Add Player
-      </button>
-    </section>
+        {names.length < MAX_PLAYERS && (
+          <button
+            type="button"
+            className={`${styles.add} bt-press`}
+            onClick={addPlayer}
+          >
+            + Add Player
+          </button>
+        )}
+
+        <p className={styles.helper}>
+          {names.length} of {MAX_PLAYERS} players · roster locks at tee-off
+        </p>
+      </section>
+
+      <div className={styles.footer}>
+        <Button big onClick={handleTeeOff}>
+          Tee Off
+        </Button>
+      </div>
+
+      <ConfirmDialog
+        open={confirmDiscard}
+        title="Start over?"
+        body="This discards your round in progress."
+        confirmLabel="Discard & start"
+        danger
+        onConfirm={() => {
+          setConfirmDiscard(false)
+          startRound()
+        }}
+        onCancel={() => setConfirmDiscard(false)}
+      />
+    </Shell>
   )
 }

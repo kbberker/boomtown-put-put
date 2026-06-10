@@ -1,0 +1,100 @@
+.content {
+  padding: 18px 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.players {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Keep the fieldset's legend for assistive tech without painting it. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.playerCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bt-white);
+  border-radius: var(--bt-radius-md);
+  padding: 10px 12px;
+  box-shadow: var(--bt-shadow-card);
+}
+
+.numberTile {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-fairway-pale);
+  font-family: var(--bt-font-display);
+  font-size: var(--bt-text-md);
+  color: var(--bt-fairway-deep);
+}
+
+.playerCard input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: var(--bt-space-2) 2px;
+  font-size: var(--bt-text-lg);
+  font-weight: 700;
+  color: var(--bt-ink);
+}
+
+.remove {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-cream);
+  border: 2px solid var(--bt-line);
+  color: var(--bt-text-muted);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.add {
+  border-radius: var(--bt-radius-md);
+  border: 2.5px dashed var(--bt-fairway-light);
+  background: transparent;
+  color: var(--bt-fairway-deep);
+  font-weight: 800;
+  font-size: var(--bt-text-md);
+  padding: 14px 0;
+}
+
+.helper {
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--bt-text-xs);
+  color: var(--bt-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--bt-space-6) 18px var(--bt-space-8);
+}

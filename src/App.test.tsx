@@ -45,7 +45,7 @@ describe('App navigation', () => {
     ).toBeInTheDocument()
 
     // Starting lands on the Scorecard with a row per Player.
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await user.click(screen.getByRole('button', { name: /tee off/i }))
     expect(
       screen.getByRole('heading', { name: /scorecard/i }),
     ).toBeInTheDocument()
@@ -67,7 +67,7 @@ describe('App navigation', () => {
 
     // Start a Round and enter Scores on the first Hole.
     await user.click(screen.getByRole('link', { name: /new round/i }))
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await user.click(screen.getByRole('button', { name: /tee off/i }))
     await user.click(screen.getAllByRole('link')[0])
     await user.type(screen.getByLabelText('Player 1'), '3')
     await user.type(screen.getByLabelText('Player 2'), '5')

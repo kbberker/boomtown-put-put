@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import { NewRound } from './NewRound'
 import { createRound, loadRound, saveRound } from './roundModel'
+
+const user = userEvent.setup()
 
 function renderNewRound() {
   render(
@@ -18,14 +20,14 @@ function renderNewRound() {
 }
 
 function playerInputs() {
-  return screen.getAllByLabelText(/player name/i) as HTMLInputElement[]
+  return screen.getAllByLabelText(/player \d name/i) as HTMLInputElement[]
+}
+
+function teeOff() {
+  return user.click(screen.getByRole('button', { name: /tee off/i }))
 }
 
 describe('NewRound', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
   it('starts with pre-filled, editable Player names', () => {
     renderNewRound()
     const inputs = playerInputs()
@@ -34,21 +36,18 @@ describe('NewRound', () => {
   })
 
   it('adds Players up to a roster of 6, pre-filling each new name', async () => {
-    const user = userEvent.setup()
     renderNewRound()
 
-    const add = screen.getByRole('button', { name: /add player/i })
     while (playerInputs().length < 6) {
-      await user.click(add)
+      await user.click(screen.getByRole('button', { name: /add player/i }))
     }
     expect(playerInputs()).toHaveLength(6)
     expect(playerInputs()[5]).toHaveValue('Player 6')
-    // Cannot exceed the maximum roster of 6.
-    expect(add).toBeDisabled()
+    // Cannot exceed the maximum roster of 6 — the add affordance goes away.
+    expect(screen.queryByRole('button', { name: /add player/i })).toBeNull()
   })
 
   it('removes Players down to a roster of 1', async () => {
-    const user = userEvent.setup()
     renderNewRound()
 
     while (playerInputs().length > 1) {
@@ -60,8 +59,16 @@ describe('NewRound', () => {
     expect(screen.queryByRole('button', { name: /remove/i })).toBeNull()
   })
 
+  it('selects the pre-filled name on focus so typing replaces it', async () => {
+    renderNewRound()
+
+    await user.click(playerInputs()[0])
+    await user.keyboard('Sam')
+
+    expect(playerInputs()[0]).toHaveValue('Sam')
+  })
+
   it('starts a Round with the edited roster, allowing duplicate names', async () => {
-    const user = userEvent.setup()
     renderNewRound()
 
     const inputs = playerInputs()
@@ -70,29 +77,27 @@ describe('NewRound', () => {
     await user.clear(inputs[1])
     await user.type(inputs[1], 'Sam')
 
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await teeOff()
 
     const round = loadRound()
     expect(round?.players.map((p) => p.name)).toEqual(['Sam', 'Sam'])
     expect(screen.getByText('SCORECARD')).toBeInTheDocument()
   })
 
-  it('returns home without creating a Round when Back is clicked', async () => {
-    const user = userEvent.setup()
+  it('returns home without creating a Round when the Home link is used', async () => {
     renderNewRound()
 
-    await user.click(screen.getByRole('button', { name: /back to home/i }))
+    await user.click(screen.getByRole('link', { name: /home/i }))
 
     expect(screen.getByText('HOME')).toBeInTheDocument()
     expect(loadRound()).toBeNull()
   })
 
-  it('blocks Start and does not create a Round when a name is empty', async () => {
-    const user = userEvent.setup()
+  it('blocks the tee-off and does not create a Round when a name is empty', async () => {
     renderNewRound()
 
     await user.clear(playerInputs()[0])
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await teeOff()
 
     expect(screen.queryByText('SCORECARD')).toBeNull()
     expect(loadRound()).toBeNull()
@@ -100,16 +105,19 @@ describe('NewRound', () => {
   })
 
   it('confirms before discarding a Round in progress, then replaces it', async () => {
-    const user = userEvent.setup()
     saveRound(createRound(['Old Player']))
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderNewRound()
 
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await teeOff()
 
-    expect(confirm).toHaveBeenCalledWith(
-      'This discards your round in progress. Start new?',
-    )
+    // The styled confirm replaces window.confirm; nothing is discarded yet.
+    expect(
+      screen.getByRole('dialog', { name: /start over/i }),
+    ).toBeInTheDocument()
+    expect(loadRound()?.players.map((p) => p.name)).toEqual(['Old Player'])
+
+    await user.click(screen.getByRole('button', { name: /discard/i }))
+
     expect(loadRound()?.players.map((p) => p.name)).toEqual([
       'Player 1',
       'Player 2',
@@ -118,25 +126,23 @@ describe('NewRound', () => {
   })
 
   it('keeps the Round in progress when the discard is cancelled', async () => {
-    const user = userEvent.setup()
     saveRound(createRound(['Old Player']))
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     renderNewRound()
 
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await teeOff()
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
 
     expect(loadRound()?.players.map((p) => p.name)).toEqual(['Old Player'])
     expect(screen.queryByText('SCORECARD')).toBeNull()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('does not confirm when no Round is in progress', async () => {
-    const user = userEvent.setup()
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderNewRound()
 
-    await user.click(screen.getByRole('button', { name: /start round/i }))
+    await teeOff()
 
-    expect(confirm).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByText('SCORECARD')).toBeInTheDocument()
   })
 })
