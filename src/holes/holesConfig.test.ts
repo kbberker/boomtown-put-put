@@ -6,6 +6,7 @@ import {
   loadHoles,
   saveHoles,
   refreshHoles,
+  saveSharedHoles,
   isHoleArray,
   type Hole,
 } from './holesConfig'
@@ -109,6 +110,71 @@ describe('holesConfig', () => {
     it('ignores a non-OK response and keeps the cache', async () => {
       stubFetch(() => Promise.resolve(jsonResponse(defaultHoles(), 500)))
       expect(await refreshHoles()).toEqual(defaultHoles())
+    })
+  })
+
+  describe('saveSharedHoles', () => {
+    const PIN = '4242'
+
+    function edited(): Hole[] {
+      const holes = defaultHoles()
+      holes[2] = { name: 'The Windmill', par: 4 }
+      return holes
+    }
+
+    it('PUTs { pin, holes } to /api/holes', async () => {
+      const holes = edited()
+      stubFetch(() => Promise.resolve(jsonResponse(holes)))
+
+      await saveSharedHoles(holes, PIN)
+
+      expect(fetch).toHaveBeenCalledWith('/api/holes', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, holes }),
+      })
+    })
+
+    it('re-caches the course and reports success on a 200', async () => {
+      const holes = edited()
+      stubFetch(() => Promise.resolve(jsonResponse(holes)))
+
+      const result = await saveSharedHoles(holes, PIN)
+
+      expect(result).toEqual({ ok: true })
+      expect(loadHoles()).toEqual(holes)
+    })
+
+    it('reports unauthorized and leaves the cache unchanged on a 401', async () => {
+      const cached: Hole[] = defaultHoles()
+      cached[0] = { name: 'Loop the Loop', par: 2 }
+      saveHoles(cached)
+      stubFetch(() => Promise.resolve(jsonResponse('Unauthorized', 401)))
+
+      const result = await saveSharedHoles(edited(), 'wrong')
+
+      expect(result).toEqual({ ok: false, reason: 'unauthorized' })
+      expect(loadHoles()).toEqual(cached)
+    })
+
+    it('reports an error and leaves the cache unchanged when the network fails', async () => {
+      const cached: Hole[] = defaultHoles()
+      cached[0] = { name: 'Loop the Loop', par: 2 }
+      saveHoles(cached)
+      stubFetch(() => Promise.reject(new Error('offline')))
+
+      const result = await saveSharedHoles(edited(), PIN)
+
+      expect(result).toEqual({ ok: false, reason: 'error' })
+      expect(loadHoles()).toEqual(cached)
+    })
+
+    it('reports an error on a non-OK response', async () => {
+      stubFetch(() => Promise.resolve(jsonResponse('Bad Request', 400)))
+      expect(await saveSharedHoles(edited(), PIN)).toEqual({
+        ok: false,
+        reason: 'error',
+      })
     })
   })
 

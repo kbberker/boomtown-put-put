@@ -63,6 +63,32 @@ export async function refreshHoles(): Promise<Hole[]> {
   }
 }
 
+/** Outcome of a shared-course write: success, a wrong PIN, or any other error. */
+export type SaveResult = { ok: true } | { ok: false; reason: 'unauthorized' | 'error' }
+
+/**
+ * Push an edited course to the shared store (ADR-0003): `PUT /api/holes` with
+ * `{ pin, holes }`. The PIN is checked server-side; a 401 comes back as
+ * `unauthorized` so the caller can surface "wrong PIN", and any other failure
+ * (offline, function down, rejected body) as `error`. The local cache is only
+ * updated on success, so a failed write leaves the current course unchanged.
+ */
+export async function saveSharedHoles(holes: Hole[], pin: string): Promise<SaveResult> {
+  try {
+    const res = await fetch(HOLES_ENDPOINT, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin, holes }),
+    })
+    if (res.status === 401) return { ok: false, reason: 'unauthorized' }
+    if (!res.ok) return { ok: false, reason: 'error' }
+    saveHoles(holes)
+    return { ok: true }
+  } catch {
+    return { ok: false, reason: 'error' }
+  }
+}
+
 function tryParseHoles(raw: string): Hole[] | null {
   try {
     const value = JSON.parse(raw)
