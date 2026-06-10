@@ -1,0 +1,168 @@
+/* Confetti: a one-shot fall over the whole felt, behind the standings. */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confettiPiece {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+/* Only animate when the user hasn't asked for reduced motion; otherwise the
+   pieces stay invisible (opacity 0) and nothing moves. */
+@media (prefers-reduced-motion: no-preference) {
+  .confettiPiece {
+    animation-name: confetti-fall;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(105vh) rotate(calc(var(--spin) * 520deg));
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 0;
+  text-align: center;
+}
+
+.kicker {
+  margin: 0;
+  font-size: var(--bt-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--bt-track-wide);
+  text-transform: uppercase;
+  color: var(--bt-fairway-light);
+}
+
+.winnerName {
+  margin: 12px 0 0;
+  color: var(--bt-yellow);
+  font-size: var(--bt-text-hero);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.32);
+}
+
+.badge {
+  margin-top: 10px;
+  padding: 7px 18px;
+  border-radius: var(--bt-radius-pill);
+  background: var(--bt-yellow);
+  color: var(--bt-ink);
+  font-weight: 800;
+  font-size: var(--bt-text-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 3px 0 var(--bt-yellow-deep);
+}
+
+.noWinner {
+  margin: 12px 0 0;
+  color: var(--bt-white);
+  font-size: var(--bt-text-2xl);
+  line-height: 1.05;
+}
+
+.subtitle {
+  margin: var(--bt-space-2) 0 0;
+  color: var(--bt-fairway-light);
+  font-weight: 700;
+  font-size: var(--bt-text-sm);
+}
+
+/* Standings: ranked rows; the winner row is a yellow chunk, the rest glass. */
+.standings {
+  list-style: none;
+  margin: 0;
+  padding: 28px 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.rankRow {
+  display: flex;
+  align-items: center;
+  gap: var(--bt-space-3);
+  padding: 13px 16px;
+  border-radius: var(--bt-radius-md);
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+.rankRow[data-winner] {
+  background: var(--bt-yellow);
+  border: none;
+  box-shadow: 0 var(--bt-chunk) 0 var(--bt-yellow-deep);
+}
+
+.rank {
+  width: 26px;
+  font-family: var(--bt-font-display);
+  font-size: var(--bt-text-lg);
+  color: var(--bt-fairway-light);
+}
+
+.rankRow[data-winner] .rank {
+  color: var(--bt-ink);
+}
+
+.rankName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 800;
+  font-size: var(--bt-text-lg);
+  color: var(--bt-white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankTotal {
+  font-family: var(--bt-font-display);
+  font-size: var(--bt-text-xl);
+  color: var(--bt-white);
+}
+
+.rankRow[data-winner] .rankName,
+.rankRow[data-winner] .rankTotal {
+  color: var(--bt-ink);
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--bt-space-8) 18px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.emptyState {
+  margin: auto;
+  padding: var(--bt-space-5);
+  text-align: center;
+  color: var(--bt-white);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bt-space-4);
+}
