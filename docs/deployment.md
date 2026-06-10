@@ -47,3 +47,24 @@ shaped this way, see `docs/adr/0003-shared-hole-config-netlify-blobs.md`.)
   *never committed*):
   - `HOLE_PIN` — the editor PIN gating `PUT /api/holes`. Server-side only; it is
     read via `process.env` in the Function and never shipped to the browser.
+
+## Local development
+
+Two ways to run the app locally:
+
+- `pnpm dev` — Vite only (port 5173). Fast, but `/api/holes` is **not** served,
+  so the shared-course read/write falls back to cached/default holes. Use this
+  for pure UI work.
+- `pnpm dev:netlify` — `netlify dev --offline` (port **8888**). Runs the Vite
+  app *and* the Functions behind the `netlify.toml` redirects, so `/api/holes`
+  resolves to the real `holes` Function. Use this to exercise hole updates.
+
+The `--offline` flag keeps everything local (the repo is intentionally **not**
+linked to the Netlify site). Blobs run against a sandbox under
+`.netlify/blobs-serve/`, isolated from production — a local `PUT` never touches
+the live `course` store. The local sandbox starts empty, so the first `GET`
+returns the built-in defaults until you save (same implicit seeding as prod).
+
+Set `HOLE_PIN` in a local `.env` (gitignored; copy `.env.example`). Because the
+store is sandboxed, the local PIN can be any value — it need not match the
+production secret.
