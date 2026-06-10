@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { loadHoles, saveHoles, type Hole } from './holesConfig'
+import { loadHoles, saveSharedHoles, type Hole } from './holesConfig'
 import { Shell } from '../ui/Shell'
 import { ScreenHeader } from '../ui/ScreenHeader'
 import { Button } from '../ui/Button'
 import styles from './HoleSetup.module.css'
+
+// The editor PIN is remembered for the editing tab only (sessionStorage, never
+// localStorage) so repeated edits in one sitting don't re-prompt (ADR-0003).
+const PIN_SESSION_KEY = 'putt-putt:pin'
 
 // Editable form rows keep `par` as a string so the field can be cleared and
 // retyped freely; we convert to a number only when saving.
@@ -28,15 +32,19 @@ function isValid(draft: HoleDraft): boolean {
 
 /**
  * Edits the fixed 9-hole course configuration. Edits are held as local drafts
- * and persisted to localStorage only when the Scorekeeper confirms with Done,
- * which requires every hole to have a name and a par of at least 1.
+ * and pushed to the shared store on Done (ADR-0003), gated by an editor PIN that
+ * is checked server-side. Done requires every hole to have a name and a par of
+ * at least 1; a wrong PIN or a failed write surfaces an error and changes
+ * nothing. The PIN is remembered in sessionStorage for the editing tab.
  */
 export function HoleSetup() {
   const navigate = useNavigate()
   const [drafts, setDrafts] = useState<HoleDraft[]>(() =>
     loadHoles().map(toDraft),
   )
+  const [pin, setPin] = useState(() => sessionStorage.getItem(PIN_SESSION_KEY) ?? '')
   const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   function updateHole(index: number, patch: Partial<HoleDraft>) {
     setDrafts((current) =>
@@ -44,12 +52,26 @@ export function HoleSetup() {
     )
   }
 
-  function handleDone() {
+  async function handleDone() {
     if (!drafts.every(isValid)) {
       setError('Every hole needs a name and a par of at least 1.')
       return
     }
-    saveHoles(drafts.map((d) => ({ name: d.name.trim(), par: parsePar(d.par) })))
+    const holes = drafts.map((d) => ({ name: d.name.trim(), par: parsePar(d.par) }))
+
+    setSaving(true)
+    const result = await saveSharedHoles(holes, pin)
+    setSaving(false)
+
+    if (!result.ok) {
+      setError(
+        result.reason === 'unauthorized'
+          ? 'That PIN was not accepted.'
+          : 'Could not save the shared course. Check your connection and try again.',
+      )
+      return
+    }
+    sessionStorage.setItem(PIN_SESSION_KEY, pin)
     navigate('/')
   }
 
@@ -89,11 +111,23 @@ export function HoleSetup() {
             </div>
           ))}
         </fieldset>
+
+        <label className={styles.pinField}>
+          Editor PIN
+          <input
+            type="password"
+            required
+            autoComplete="off"
+            aria-invalid={pin === ''}
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+          />
+        </label>
       </section>
 
       <div className={styles.footer}>
-        <Button big onClick={handleDone}>
-          Done
+        <Button big onClick={handleDone} disabled={saving}>
+          {saving ? 'Saving…' : 'Done'}
         </Button>
       </div>
     </Shell>
