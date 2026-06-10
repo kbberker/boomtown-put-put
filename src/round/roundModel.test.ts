@@ -10,6 +10,7 @@ import {
   unscoredHoleCount,
   rankPlayers,
   totalFor,
+  nextUnscoredHole,
   MIN_PLAYERS,
   MAX_PLAYERS,
 } from './roundModel'
@@ -170,5 +171,43 @@ describe('roundModel', () => {
     let round = createRound(['Alice', 'Bob'])
     round = setScore(round, 0, 0, 1) // lowest, but Round not complete
     expect(rankPlayers(round).every((r) => !r.isWinner)).toBe(true)
+  })
+
+  describe('nextUnscoredHole', () => {
+    it('returns the first unscored Hole when no `after` is given', () => {
+      let round = createRound(['Alice', 'Bob'])
+      expect(nextUnscoredHole(round)).toBe(0)
+      // Fully score Holes 1 and 2 -> first unscored is Hole index 2.
+      for (const h of [0, 1]) {
+        round = setScore(round, 0, h, 2)
+        round = setScore(round, 1, h, 3)
+      }
+      expect(nextUnscoredHole(round)).toBe(2)
+    })
+
+    it('treats a partially scored Hole as unscored', () => {
+      let round = createRound(['Alice', 'Bob'])
+      round = setScore(round, 0, 0, 2) // Bob still blank on Hole 1
+      expect(nextUnscoredHole(round)).toBe(0)
+    })
+
+    it('starts scanning after the given Hole', () => {
+      const round = createRound(['Alice'])
+      expect(nextUnscoredHole(round, 3)).toBe(4)
+    })
+
+    it('wraps past the last Hole back to the start', () => {
+      let round = createRound(['Alice'])
+      // Score every Hole except Hole index 1.
+      for (let h = 0; h < HOLE_COUNT; h++) {
+        if (h !== 1) round = setScore(round, 0, h, 2)
+      }
+      expect(nextUnscoredHole(round, 5)).toBe(1)
+    })
+
+    it('returns null for a complete Round', () => {
+      expect(nextUnscoredHole(fullyScored(['Alice', 'Bob']))).toBeNull()
+      expect(nextUnscoredHole(fullyScored(['Alice', 'Bob']), 4)).toBeNull()
+    })
   })
 })

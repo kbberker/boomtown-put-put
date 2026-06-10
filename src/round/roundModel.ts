@@ -90,6 +90,20 @@ export function unscoredHoleCount(round: Round): number {
   return count
 }
 
+/**
+ * The first Hole not fully scored at/after `after` + 1, scanning all Holes and
+ * wrapping past the last one, or null once the Round is complete. With no
+ * `after` the scan starts at Hole 0. Returns a 0-based Hole index.
+ */
+export function nextUnscoredHole(round: Round, after?: number): number | null {
+  const start = after === undefined ? 0 : after + 1
+  for (let offset = 0; offset < HOLE_COUNT; offset++) {
+    const holeIndex = (start + offset) % HOLE_COUNT
+    if (!isHoleScored(round, holeIndex)) return holeIndex
+  }
+  return null
+}
+
 // A Player's final standing: their Total and whether they are a Winner. Only a
 // complete Round can declare a Winner; ties on the lowest Total yield co-Winners.
 export type RankedPlayer = {
