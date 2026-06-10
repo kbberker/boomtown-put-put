@@ -13,7 +13,7 @@ only the Hole config goes remote. This amends ADR-0001 for the Hole config:
 
 - **Pure static frontend with a build-time PIN — rejected.** Anything shipped to
   the browser is readable in devtools, so a "secret" PIN inlined at build time is
-  not secret. Honouring "the PIN is a deploy secret" *requires* server-side
+  not secret. Honouring "the PIN is a deploy secret" _requires_ server-side
   execution. This is why a server-side component exists at all.
 - **Model A: thin serverless API — chosen.** Two functions in front of the
   store; the browser never sees the DB or the PIN. Maps the "PIN as a deploy
@@ -54,5 +54,5 @@ only the Hole config goes remote. This amends ADR-0001 for the Hole config:
 - **One validator, three call sites.** The existing `isHoleArray` guard validates
   the cache, the fetched response, and the `PUT` body.
 - **The design is safe to publish.** No secret lives in this ADR or the repo;
-  only the PIN *value* is secret (in Netlify env, never committed). Defenses do
+  only the PIN _value_ is secret (in Netlify env, never committed). Defenses do
   not rely on hiding the architecture.

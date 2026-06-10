@@ -1,10 +1,10 @@
-import { Routes, Route } from 'react-router'
-import { Home } from './Home'
-import { HoleSetup } from './holes/HoleSetup'
-import { NewRound } from './round/NewRound'
-import { HoleEntry } from './round/HoleEntry'
-import { Scorecard } from './round/Scorecard'
-import { Results } from './round/Results'
+import { Routes, Route } from "react-router";
+import { Home } from "./Home";
+import { HoleSetup } from "./holes/HoleSetup";
+import { NewRound } from "./round/NewRound";
+import { HoleEntry } from "./round/HoleEntry";
+import { Scorecard } from "./round/Scorecard";
+import { Results } from "./round/Results";
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
       <Route path="/results" element={<Results />} />
       <Route path="/hole/:holeIndex" element={<HoleEntry />} />
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;

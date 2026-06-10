@@ -2,24 +2,24 @@
 // Hole config survives across Rounds in localStorage (see ADR-0001).
 
 export type Hole = {
-  name: string
-  par: number
-}
+  name: string;
+  par: number;
+};
 
-export const HOLE_COUNT = 9
-export const DEFAULT_PAR = 3
+export const HOLE_COUNT = 9;
+export const DEFAULT_PAR = 3;
 
-const STORAGE_KEY = 'putt-putt:holes'
+const STORAGE_KEY = "putt-putt:holes";
 
 /** The shared-course read endpoint served by a Netlify Function (ADR-0003). */
-const HOLES_ENDPOINT = '/api/holes'
+const HOLES_ENDPOINT = "/api/holes";
 
 /** The seed configuration used on first run: "Hole 1".."Hole 9", all par 3. */
 export function defaultHoles(): Hole[] {
   return Array.from({ length: HOLE_COUNT }, (_, i) => ({
     name: `Hole ${i + 1}`,
     par: DEFAULT_PAR,
-  }))
+  }));
 }
 
 /**
@@ -27,19 +27,19 @@ export function defaultHoles(): Hole[] {
  * stored data is missing/corrupt, seed the defaults, persist them, and return.
  */
 export function loadHoles(): Hole[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
+  const raw = localStorage.getItem(STORAGE_KEY);
   if (raw !== null) {
-    const parsed = tryParseHoles(raw)
-    if (parsed) return parsed
+    const parsed = tryParseHoles(raw);
+    if (parsed) return parsed;
   }
-  const seeded = defaultHoles()
-  saveHoles(seeded)
-  return seeded
+  const seeded = defaultHoles();
+  saveHoles(seeded);
+  return seeded;
 }
 
 /** Persist the Hole configuration. */
 export function saveHoles(holes: Hole[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(holes))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(holes));
 }
 
 /**
@@ -52,19 +52,21 @@ export function saveHoles(holes: Hole[]): void {
  */
 export async function refreshHoles(): Promise<Hole[]> {
   try {
-    const res = await fetch(HOLES_ENDPOINT)
-    if (!res.ok) return loadHoles()
-    const value: unknown = await res.json()
-    if (!isHoleArray(value)) return loadHoles()
-    saveHoles(value)
-    return value
+    const res = await fetch(HOLES_ENDPOINT);
+    if (!res.ok) return loadHoles();
+    const value: unknown = await res.json();
+    if (!isHoleArray(value)) return loadHoles();
+    saveHoles(value);
+    return value;
   } catch {
-    return loadHoles()
+    return loadHoles();
   }
 }
 
 /** Outcome of a shared-course write: success, a wrong PIN, or any other error. */
-export type SaveResult = { ok: true } | { ok: false; reason: 'unauthorized' | 'error' }
+export type SaveResult =
+  | { ok: true }
+  | { ok: false; reason: "unauthorized" | "error" };
 
 /**
  * Push an edited course to the shared store (ADR-0003): `PUT /api/holes` with
@@ -73,29 +75,32 @@ export type SaveResult = { ok: true } | { ok: false; reason: 'unauthorized' | 'e
  * (offline, function down, rejected body) as `error`. The local cache is only
  * updated on success, so a failed write leaves the current course unchanged.
  */
-export async function saveSharedHoles(holes: Hole[], pin: string): Promise<SaveResult> {
+export async function saveSharedHoles(
+  holes: Hole[],
+  pin: string,
+): Promise<SaveResult> {
   try {
     const res = await fetch(HOLES_ENDPOINT, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pin, holes }),
-    })
-    if (res.status === 401) return { ok: false, reason: 'unauthorized' }
-    if (!res.ok) return { ok: false, reason: 'error' }
-    saveHoles(holes)
-    return { ok: true }
+    });
+    if (res.status === 401) return { ok: false, reason: "unauthorized" };
+    if (!res.ok) return { ok: false, reason: "error" };
+    saveHoles(holes);
+    return { ok: true };
   } catch {
-    return { ok: false, reason: 'error' }
+    return { ok: false, reason: "error" };
   }
 }
 
 function tryParseHoles(raw: string): Hole[] | null {
   try {
-    const value = JSON.parse(raw)
-    if (!isHoleArray(value)) return null
-    return value
+    const value = JSON.parse(raw);
+    if (!isHoleArray(value)) return null;
+    return value;
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -110,10 +115,10 @@ export function isHoleArray(value: unknown): value is Hole[] {
     value.length === HOLE_COUNT &&
     value.every(
       (h) =>
-        typeof h === 'object' &&
+        typeof h === "object" &&
         h !== null &&
-        typeof (h as Hole).name === 'string' &&
-        typeof (h as Hole).par === 'number',
+        typeof (h as Hole).name === "string" &&
+        typeof (h as Hole).par === "number",
     )
-  )
+  );
 }

@@ -1,7 +1,7 @@
 # Deployment & infrastructure
 
 Operational runbook for where this app lives and how it's wired. No secret
-values belong in this file — only the topology. (For *why* the architecture is
+values belong in this file — only the topology. (For _why_ the architecture is
 shaped this way, see `docs/adr/0003-shared-hole-config-netlify-blobs.md`.)
 
 ## Topology
@@ -44,7 +44,7 @@ shaped this way, see `docs/adr/0003-shared-hole-config-netlify-blobs.md`.)
 - **Build command:** `pnpm build` · **Publish:** `dist` · **Functions:**
   `netlify/functions` (all from `netlify.toml`).
 - **Environment variables** (set in Netlify UI → Site settings → Environment,
-  *never committed*):
+  _never committed_):
   - `HOLE_PIN` — the editor PIN gating `PUT /api/holes`. Server-side only; it is
     read via `process.env` in the Function and never shipped to the browser.
 
@@ -56,7 +56,7 @@ Two ways to run the app locally:
   so the shared-course read/write falls back to cached/default holes. Use this
   for pure UI work.
 - `pnpm dev:netlify` — `netlify dev --offline` (port **8888**). Runs the Vite
-  app *and* the Functions behind the `netlify.toml` redirects, so `/api/holes`
+  app _and_ the Functions behind the `netlify.toml` redirects, so `/api/holes`
   resolves to the real `holes` Function. Use this to exercise hole updates.
 
 The `--offline` flag keeps everything local (the repo is intentionally **not**

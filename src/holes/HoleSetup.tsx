@@ -1,33 +1,33 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { loadHoles, saveSharedHoles, type Hole } from './holesConfig'
-import { Shell } from '../ui/Shell'
-import { ScreenHeader } from '../ui/ScreenHeader'
-import { Button } from '../ui/Button'
-import styles from './HoleSetup.module.css'
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { loadHoles, saveSharedHoles, type Hole } from "./holesConfig";
+import { Shell } from "../ui/Shell";
+import { ScreenHeader } from "../ui/ScreenHeader";
+import { Button } from "../ui/Button";
+import styles from "./HoleSetup.module.css";
 
 // The editor PIN is remembered for the editing tab only (sessionStorage, never
 // localStorage) so repeated edits in one sitting don't re-prompt (ADR-0003).
-const PIN_SESSION_KEY = 'putt-putt:pin'
+const PIN_SESSION_KEY = "putt-putt:pin";
 
 // Editable form rows keep `par` as a string so the field can be cleared and
 // retyped freely; we convert to a number only when saving.
 type HoleDraft = {
-  name: string
-  par: string
-}
+  name: string;
+  par: string;
+};
 
 function toDraft(hole: Hole): HoleDraft {
-  return { name: hole.name, par: String(hole.par) }
+  return { name: hole.name, par: String(hole.par) };
 }
 
 function parsePar(par: string): number {
-  return parseInt(par, 10)
+  return parseInt(par, 10);
 }
 
 function isValid(draft: HoleDraft): boolean {
-  const par = parsePar(draft.par)
-  return draft.name.trim() !== '' && !Number.isNaN(par) && par >= 1
+  const par = parsePar(draft.par);
+  return draft.name.trim() !== "" && !Number.isNaN(par) && par >= 1;
 }
 
 /**
@@ -38,46 +38,55 @@ function isValid(draft: HoleDraft): boolean {
  * nothing. The PIN is remembered in sessionStorage for the editing tab.
  */
 export function HoleSetup() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [drafts, setDrafts] = useState<HoleDraft[]>(() =>
     loadHoles().map(toDraft),
-  )
-  const [pin, setPin] = useState(() => sessionStorage.getItem(PIN_SESSION_KEY) ?? '')
-  const [error, setError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
+  );
+  const [pin, setPin] = useState(
+    () => sessionStorage.getItem(PIN_SESSION_KEY) ?? "",
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   function updateHole(index: number, patch: Partial<HoleDraft>) {
     setDrafts((current) =>
       current.map((draft, i) => (i === index ? { ...draft, ...patch } : draft)),
-    )
+    );
   }
 
   async function handleDone() {
     if (!drafts.every(isValid)) {
-      setError('Every hole needs a name and a par of at least 1.')
-      return
+      setError("Every hole needs a name and a par of at least 1.");
+      return;
     }
-    const holes = drafts.map((d) => ({ name: d.name.trim(), par: parsePar(d.par) }))
+    const holes = drafts.map((d) => ({
+      name: d.name.trim(),
+      par: parsePar(d.par),
+    }));
 
-    setSaving(true)
-    const result = await saveSharedHoles(holes, pin)
-    setSaving(false)
+    setSaving(true);
+    const result = await saveSharedHoles(holes, pin);
+    setSaving(false);
 
     if (!result.ok) {
       setError(
-        result.reason === 'unauthorized'
-          ? 'That PIN was not accepted.'
-          : 'Could not save the shared course. Check your connection and try again.',
-      )
-      return
+        result.reason === "unauthorized"
+          ? "That PIN was not accepted."
+          : "Could not save the shared course. Check your connection and try again.",
+      );
+      return;
     }
-    sessionStorage.setItem(PIN_SESSION_KEY, pin)
-    navigate('/')
+    sessionStorage.setItem(PIN_SESSION_KEY, pin);
+    navigate("/");
   }
 
   return (
     <Shell>
-      <ScreenHeader kicker="The Course" title="Hole Setup" />
+      <ScreenHeader
+        kicker="The Course"
+        title="Hole Setup"
+        back={{ label: "Home", to: "/" }}
+      />
 
       <section className={styles.content}>
         {error && <p role="alert">{error}</p>}
@@ -91,7 +100,7 @@ export function HoleSetup() {
                 <input
                   type="text"
                   required
-                  aria-invalid={draft.name.trim() === ''}
+                  aria-invalid={draft.name.trim() === ""}
                   value={draft.name}
                   onChange={(e) => updateHole(index, { name: e.target.value })}
                 />
@@ -118,7 +127,7 @@ export function HoleSetup() {
             type="password"
             required
             autoComplete="off"
-            aria-invalid={pin === ''}
+            aria-invalid={pin === ""}
             value={pin}
             onChange={(e) => setPin(e.target.value)}
           />
@@ -127,9 +136,9 @@ export function HoleSetup() {
 
       <div className={styles.footer}>
         <Button big onClick={handleDone} disabled={saving}>
-          {saving ? 'Saving…' : 'Done'}
+          {saving ? "Saving…" : "Done"}
         </Button>
       </div>
     </Shell>
-  )
+  );
 }

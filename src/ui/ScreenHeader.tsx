@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
-import styles from './ScreenHeader.module.css'
+import type { ReactNode } from "react";
+import { Link } from "react-router";
+import styles from "./ScreenHeader.module.css";
 
 /**
  * Green scoreboard header bar for the functional (cream) screens: tracked
@@ -13,10 +13,10 @@ export function ScreenHeader({
   back,
   right,
 }: {
-  kicker?: string
-  title: string
-  back?: { to: string; label: string }
-  right?: ReactNode
+  kicker?: string;
+  title: string;
+  back?: { to: string; label: string };
+  right?: ReactNode;
 }) {
   return (
     <header className={styles.header}>
@@ -37,5 +37,5 @@ export function ScreenHeader({
         <h1 className={styles.title}>{title}</h1>
       </div>
     </header>
-  )
+  );
 }

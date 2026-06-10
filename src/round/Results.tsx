@@ -1,16 +1,21 @@
-import { type CSSProperties } from 'react'
-import { useNavigate } from 'react-router'
-import { loadRound, clearRound, rankPlayers, isRoundComplete } from './roundModel'
-import { Shell } from '../ui/Shell'
-import { Button } from '../ui/Button'
-import styles from './Results.module.css'
+import { type CSSProperties } from "react";
+import { useNavigate } from "react-router";
+import {
+  loadRound,
+  clearRound,
+  rankPlayers,
+  isRoundComplete,
+} from "./roundModel";
+import { Shell } from "../ui/Shell";
+import { Button } from "../ui/Button";
+import styles from "./Results.module.css";
 
 const CONFETTI_COLORS = [
-  'var(--bt-yellow)',
-  'var(--bt-fairway-light)',
-  'var(--bt-blue)',
-  'var(--bt-white)',
-]
+  "var(--bt-yellow)",
+  "var(--bt-fairway-light)",
+  "var(--bt-blue)",
+  "var(--bt-white)",
+];
 
 // A fixed decorative burst — one-shot and prop-independent, so it lives at
 // module scope and is shared by every mount. The CSS animation only runs when
@@ -22,7 +27,7 @@ const CONFETTI = Array.from({ length: 26 }, (_, i) => ({
   size: 7 + Math.random() * 7,
   color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
   spin: Math.random() > 0.5 ? 1 : -1,
-}))
+}));
 
 /**
  * The Results screen: the active Round's final standings on the felt, Players
@@ -37,12 +42,12 @@ const CONFETTI = Array.from({ length: 26 }, (_, i) => ({
  * intact so the group can nip back and fix a Score.
  */
 export function Results() {
-  const navigate = useNavigate()
-  const round = loadRound()
+  const navigate = useNavigate();
+  const round = loadRound();
 
   function leave() {
-    clearRound()
-    navigate('/')
+    clearRound();
+    navigate("/");
   }
 
   if (!round) {
@@ -53,12 +58,12 @@ export function Results() {
           <Button onClick={leave}>Back to Home</Button>
         </div>
       </Shell>
-    )
+    );
   }
 
-  const ranked = rankPlayers(round)
-  const complete = isRoundComplete(round)
-  const winners = ranked.filter((r) => r.isWinner)
+  const ranked = rankPlayers(round);
+  const complete = isRoundComplete(round);
+  const winners = ranked.filter((r) => r.isWinner);
 
   return (
     <Shell felt>
@@ -76,7 +81,7 @@ export function Results() {
                   background: c.color,
                   animationDelay: `${c.delay}s`,
                   animationDuration: `${c.dur}s`,
-                  '--spin': c.spin,
+                  "--spin": c.spin,
                 } as CSSProperties
               }
             />
@@ -89,10 +94,10 @@ export function Results() {
         {complete ? (
           <>
             <h1 className={styles.winnerName}>
-              {winners.map((w) => w.player.name).join(' & ')}
+              {winners.map((w) => w.player.name).join(" & ")}
             </h1>
             <span className={styles.badge}>
-              {winners.length > 1 ? 'Co-Winners' : 'Winner'} ·{' '}
+              {winners.length > 1 ? "Co-Winners" : "Winner"} ·{" "}
               {winners[0].total} strokes
             </span>
           </>
@@ -124,10 +129,10 @@ export function Results() {
         <Button big onClick={leave}>
           Done · Back to Home
         </Button>
-        <Button variant="ghost-dark" onClick={() => navigate('/scorecard')}>
+        <Button variant="ghost-dark" onClick={() => navigate("/scorecard")}>
           Back to Scorecard
         </Button>
       </div>
     </Shell>
-  )
+  );
 }

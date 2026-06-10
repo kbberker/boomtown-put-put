@@ -1,19 +1,24 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { Link } from 'react-router'
-import styles from './Button.module.css'
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { Link } from "react-router";
+import styles from "./Button.module.css";
 
-type Variant = 'cta' | 'ghost-dark' | 'ghost-light'
+type Variant = "cta" | "ghost-dark" | "ghost-light";
 
 const variantClass: Record<Variant, string> = {
   cta: styles.cta,
-  'ghost-dark': styles.ghostDark,
-  'ghost-light': styles.ghostLight,
-}
+  "ghost-dark": styles.ghostDark,
+  "ghost-light": styles.ghostLight,
+};
 
 function classes(variant: Variant, big: boolean): string {
-  return [styles.button, variantClass[variant], big ? styles.big : '', 'bt-press']
+  return [
+    styles.button,
+    variantClass[variant],
+    big ? styles.big : "",
+    "bt-press",
+  ]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 }
 
 /**
@@ -21,38 +26,38 @@ function classes(variant: Variant, big: boolean): string {
  * ghost variant for secondary actions (dark for felt, light for cream).
  */
 export function Button({
-  variant = 'cta',
+  variant = "cta",
   big = false,
-  type = 'button',
+  type = "button",
   children,
   ...rest
 }: {
-  variant?: Variant
-  big?: boolean
-  children: ReactNode
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'>) {
+  variant?: Variant;
+  big?: boolean;
+  children: ReactNode;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className">) {
   return (
     <button type={type} className={classes(variant, big)} {...rest}>
       {children}
     </button>
-  )
+  );
 }
 
 /** The same chunky look on a react-router link, for pure-navigation CTAs. */
 export function ButtonLink({
   to,
-  variant = 'cta',
+  variant = "cta",
   big = false,
   children,
 }: {
-  to: string
-  variant?: Variant
-  big?: boolean
-  children: ReactNode
+  to: string;
+  variant?: Variant;
+  big?: boolean;
+  children: ReactNode;
 }) {
   return (
     <Link to={to} className={classes(variant, big)}>
       {children}
     </Link>
-  )
+  );
 }

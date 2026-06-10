@@ -43,8 +43,8 @@
     --bt-error-border: #f2c4b6;
 
     /* ---- Type ---- */
-    --bt-font-display: 'Anton', 'Arial Narrow', sans-serif;
-    --bt-font-body: 'Barlow', 'Helvetica Neue', sans-serif;
+    --bt-font-display: "Anton", "Arial Narrow", sans-serif;
+    --bt-font-body: "Barlow", "Helvetica Neue", sans-serif;
     --bt-text-xs: 12px;
     --bt-text-sm: 14px;
     --bt-text-md: 16px;
@@ -141,7 +141,7 @@
     background: var(--bt-white);
   }
 
-  :is(input, select, textarea)[aria-invalid='true'] {
+  :is(input, select, textarea)[aria-invalid="true"] {
     border-color: var(--bt-pickup);
   }
 
@@ -164,7 +164,7 @@
   }
 
   /* Inline validation banner (screens surface errors via role="alert"). */
-  [role='alert'] {
+  [role="alert"] {
     margin: var(--bt-space-3) 0;
     padding: 11px 14px;
     background: var(--bt-error-bg);

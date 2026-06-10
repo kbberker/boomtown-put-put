@@ -1,5 +1,5 @@
-import { useState, type CSSProperties } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useState, type CSSProperties } from "react";
+import { Link, useNavigate } from "react-router";
 import {
   loadRound,
   totalFor,
@@ -7,14 +7,14 @@ import {
   unscoredHoleCount,
   nextUnscoredHole,
   MAX_SCORE,
-} from './roundModel'
-import { HOLE_COUNT } from '../holes/holesConfig'
-import { useHoles } from '../holes/useHoles'
-import { Shell } from '../ui/Shell'
-import { ScreenHeader } from '../ui/ScreenHeader'
-import { Button, ButtonLink } from '../ui/Button'
-import { ConfirmDialog } from '../ui/ConfirmDialog'
-import styles from './Scorecard.module.css'
+} from "./roundModel";
+import { HOLE_COUNT } from "../holes/holesConfig";
+import { useHoles } from "../holes/useHoles";
+import { Shell } from "../ui/Shell";
+import { ScreenHeader } from "../ui/ScreenHeader";
+import { Button, ButtonLink } from "../ui/Button";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
+import styles from "./Scorecard.module.css";
 
 /**
  * The Scorecard: the read-only hub for the active Round. Mobile-first flipped
@@ -28,10 +28,10 @@ import styles from './Scorecard.module.css'
  * screen handles an incomplete Round by declaring no Winner.
  */
 export function Scorecard() {
-  const navigate = useNavigate()
-  const round = loadRound()
-  const holes = useHoles()
-  const [confirmFinish, setConfirmFinish] = useState(false)
+  const navigate = useNavigate();
+  const round = loadRound();
+  const holes = useHoles();
+  const [confirmFinish, setConfirmFinish] = useState(false);
 
   if (!round) {
     return (
@@ -39,20 +39,20 @@ export function Scorecard() {
         <ScreenHeader title="Scorecard" />
         <p className={styles.emptyState}>No active Round.</p>
       </Shell>
-    )
+    );
   }
 
-  const blank = unscoredHoleCount(round)
-  const nextHole = nextUnscoredHole(round)
-  const totals = round.players.map(totalFor)
-  const anyScores = totals.some((t) => t > 0)
-  const lowest = Math.min(...totals)
+  const blank = unscoredHoleCount(round);
+  const nextHole = nextUnscoredHole(round);
+  const totals = round.players.map(totalFor);
+  const anyScores = totals.some((t) => t > 0);
+  const lowest = Math.min(...totals);
   // One shared template: Hole cell + a column per Player.
-  const gridStyle = { '--players': round.players.length } as CSSProperties
+  const gridStyle = { "--players": round.players.length } as CSSProperties;
 
   function handleFinish() {
-    if (blank > 0) setConfirmFinish(true)
-    else navigate('/results')
+    if (blank > 0) setConfirmFinish(true);
+    else navigate("/results");
   }
 
   return (
@@ -60,11 +60,11 @@ export function Scorecard() {
       <ScreenHeader
         kicker={
           blank === 0
-            ? 'All holes scored'
+            ? "All holes scored"
             : `${HOLE_COUNT - blank} of ${HOLE_COUNT} holes scored`
         }
         title="Scorecard"
-        back={{ to: '/', label: 'Home' }}
+        back={{ to: "/", label: "Home" }}
         right={
           <button
             type="button"
@@ -88,8 +88,8 @@ export function Scorecard() {
 
         <div className={styles.rows}>
           {holes.map((hole, holeIndex) => {
-            const scored = isHoleScored(round, holeIndex)
-            const upNext = holeIndex === nextHole
+            const scored = isHoleScored(round, holeIndex);
+            const upNext = holeIndex === nextHole;
             return (
               <Link
                 key={holeIndex}
@@ -98,7 +98,7 @@ export function Scorecard() {
                 style={gridStyle}
                 data-up-next={upNext}
                 aria-label={`${hole.name}, par ${hole.par}, ${
-                  scored ? 'scored' : 'not yet scored'
+                  scored ? "scored" : "not yet scored"
                 } — edit scores`}
               >
                 <span className={styles.holeCell}>
@@ -111,7 +111,7 @@ export function Scorecard() {
                   </span>
                 </span>
                 {round.players.map((player, playerIndex) => {
-                  const score = player.scores[holeIndex]
+                  const score = player.scores[holeIndex];
                   return (
                     <span key={playerIndex} className={styles.scoreCell}>
                       <span
@@ -119,15 +119,17 @@ export function Scorecard() {
                         data-ace={score === 1}
                         data-blank={score === null}
                         data-picked-up={score === MAX_SCORE}
-                        aria-label={score === null ? 'not yet entered' : undefined}
+                        aria-label={
+                          score === null ? "not yet entered" : undefined
+                        }
                       >
-                        {score ?? '·'}
+                        {score ?? "·"}
                       </span>
                     </span>
-                  )
+                  );
                 })}
               </Link>
-            )
+            );
           })}
         </div>
 
@@ -161,14 +163,14 @@ export function Scorecard() {
       <ConfirmDialog
         open={confirmFinish}
         title="Finish early?"
-        body={`${blank} hole${blank === 1 ? ' is' : 's are'} still blank — an incomplete round has no winner.`}
+        body={`${blank} hole${blank === 1 ? " is" : "s are"} still blank — an incomplete round has no winner.`}
         confirmLabel="Finish anyway"
         onConfirm={() => {
-          setConfirmFinish(false)
-          navigate('/results')
+          setConfirmFinish(false);
+          navigate("/results");
         }}
         onCancel={() => setConfirmFinish(false)}
       />
     </Shell>
-  )
+  );
 }
