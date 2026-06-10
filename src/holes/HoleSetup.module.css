@@ -59,6 +59,30 @@
   color: var(--bt-ink);
 }
 
+/* The editor PIN sits in its own card below the holes, same field styling. */
+.pinField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bt-space-1);
+  margin-top: var(--bt-space-4);
+  background: var(--bt-white);
+  border-radius: var(--bt-radius-md);
+  padding: var(--bt-space-3) 14px;
+  box-shadow: var(--bt-shadow-card);
+  font-size: var(--bt-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bt-text-muted);
+}
+
+.pinField input {
+  width: 100%;
+  font-size: var(--bt-text-md);
+  font-weight: 700;
+  color: var(--bt-ink);
+}
+
 .footer {
   margin-top: auto;
   padding: var(--bt-space-6) var(--bt-space-5) var(--bt-space-8);

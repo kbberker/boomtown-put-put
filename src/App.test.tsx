@@ -1,12 +1,19 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import App from './App'
 
+const user = userEvent.setup()
+
 describe('App navigation', () => {
   it('starts on Home and navigates to Hole Setup and back', async () => {
-    const user = userEvent.setup()
+    // Hole Setup's Done now writes the course to the shared store before
+    // returning Home (ADR-0003); stand in a successful save.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('[]', { status: 200 }))),
+    )
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
@@ -22,16 +29,16 @@ describe('App navigation', () => {
     await user.click(screen.getByRole('link', { name: /hole setup/i }))
     expect(screen.getAllByLabelText(/hole name/i)).toHaveLength(9)
 
-    // Done returns to Home.
+    // A correct PIN + Done saves and returns to Home.
+    await user.type(screen.getByLabelText(/pin/i), '4242')
     await user.click(screen.getByRole('button', { name: /done/i }))
     expect(
-      screen.getByRole('heading', { name: /put put/i }),
+      await screen.findByRole('heading', { name: /put put/i }),
     ).toBeInTheDocument()
     expect(screen.queryByLabelText(/hole name/i)).toBeNull()
   })
 
   it('starts a Round from Home and lands on the Scorecard hub', async () => {
-    const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
@@ -54,7 +61,6 @@ describe('App navigation', () => {
   })
 
   it('preserves an in-progress Round across a reload and resumes with Scores intact', async () => {
-    const user = userEvent.setup()
     const { unmount } = render(
       <MemoryRouter initialEntries={['/']}>
         <App />
