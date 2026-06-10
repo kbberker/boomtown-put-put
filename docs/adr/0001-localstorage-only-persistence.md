@@ -26,4 +26,13 @@ walking a backyard course, where tabs get discarded from memory).
 - Adding Round history or per-Player stats later means introducing a real data
   store and migrating off `localStorage` — a deliberate, non-trivial step, not a
   config toggle. This is why the boundary is recorded here.
-  /
+
+## Update — Hole config superseded by ADR-0003
+
+The Hole-configuration half of this decision is superseded by **ADR-0003**: the
+course is now a single shared record stored remotely (Netlify Blobs behind a
+serverless API), so anyone playing reads the same names and pars. `localStorage`
+is demoted from source of truth to a **cache** for the Hole config (cache-first
+reads, offline falls back to cache then built-in defaults). The **active Round**
+is unchanged — it remains localStorage-only and single-device, and the
+crash-recovery rationale above still holds for it.
