@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Design reference bundle — consult locally, never commit (copy what's
+# needed out of it instead, e.g. the optimized logo in src/assets/).
+src/assets/design_handoff_boomtown_ui/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
