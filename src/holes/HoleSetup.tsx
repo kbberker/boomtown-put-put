@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { loadHoles, saveHoles, type Hole } from './holesConfig'
+import { Shell } from '../ui/Shell'
+import { ScreenHeader } from '../ui/ScreenHeader'
+import { Button } from '../ui/Button'
+import styles from './HoleSetup.module.css'
 
 // Editable form rows keep `par` as a string so the field can be cleared and
 // retyped freely; we convert to a number only when saving.
@@ -50,45 +54,48 @@ export function HoleSetup() {
   }
 
   return (
-    <section>
-      <header>
-        <h1>Hole Setup</h1>
-        <button type="button" onClick={handleDone}>
+    <Shell>
+      <ScreenHeader kicker="The Course" title="Hole Setup" />
+
+      <section className={styles.content}>
+        {error && <p role="alert">{error}</p>}
+
+        <fieldset className={styles.holes}>
+          <legend className={styles.legend}>Holes</legend>
+          {drafts.map((draft, index) => (
+            <div key={index} className={styles.holeCard}>
+              <label className={styles.nameField}>
+                Hole name
+                <input
+                  type="text"
+                  required
+                  aria-invalid={draft.name.trim() === ''}
+                  value={draft.name}
+                  onChange={(e) => updateHole(index, { name: e.target.value })}
+                />
+              </label>
+              <label className={styles.parField}>
+                Par
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={9}
+                  aria-invalid={!(parsePar(draft.par) >= 1)}
+                  value={draft.par}
+                  onChange={(e) => updateHole(index, { par: e.target.value })}
+                />
+              </label>
+            </div>
+          ))}
+        </fieldset>
+      </section>
+
+      <div className={styles.footer}>
+        <Button big onClick={handleDone}>
           Done
-        </button>
-      </header>
-
-      {error && <p role="alert">{error}</p>}
-
-      <fieldset>
-        <legend>Holes</legend>
-        {drafts.map((draft, index) => (
-          <div key={index}>
-            <label>
-              Hole name
-              <input
-                type="text"
-                required
-                aria-invalid={draft.name.trim() === ''}
-                value={draft.name}
-                onChange={(e) => updateHole(index, { name: e.target.value })}
-              />
-            </label>
-            <label>
-              Par
-              <input
-                type="number"
-                required
-                min={1}
-                max={9}
-                aria-invalid={!(parsePar(draft.par) >= 1)}
-                value={draft.par}
-                onChange={(e) => updateHole(index, { par: e.target.value })}
-              />
-            </label>
-          </div>
-        ))}
-      </fieldset>
-    </section>
+        </Button>
+      </div>
+    </Shell>
   )
 }
