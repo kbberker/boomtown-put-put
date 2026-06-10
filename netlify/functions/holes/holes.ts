@@ -1,5 +1,5 @@
 import { getStore } from '@netlify/blobs'
-import { defaultHoles, isHoleArray } from '../../src/holes/holesConfig'
+import { defaultHoles, isHoleArray } from '../../../src/holes/holesConfig'
 
 // The shared course lives as a single JSON document in Netlify Blobs (ADR-0003).
 // The Blob starts empty; reads fall back to the built-in defaults until a

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { defaultHoles, type Hole } from '../../src/holes/holesConfig'
+import { defaultHoles, type Hole } from '../../../src/holes/holesConfig'
 
 // Stand in for the Netlify Blobs store so the handler can be exercised without
 // a real backend; `get` is what GET reads through and `set` is what PUT writes.
