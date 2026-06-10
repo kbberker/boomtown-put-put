@@ -15,6 +15,7 @@ dist-ssr
 # Local env / secrets (HOLE_PIN lives in Netlify env, never committed)
 .env
 .env.*
+!.env.example
 
 # Design reference bundle — consult locally, never commit (copy what's
 # needed out of it instead, e.g. the optimized logo in src/assets/).
@@ -33,3 +34,9 @@ docs/future-work.md
 *.njsproj
 *.sln
 *.sw?
+
+# Local Netlify folder
+.netlify
+
+# Deno lockfile from `netlify dev`'s edge runtime (no edge functions here)
+deno.lock
