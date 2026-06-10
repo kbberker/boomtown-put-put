@@ -1,0 +1,65 @@
+.dialog {
+  border: none;
+  border-radius: var(--bt-radius-lg);
+  /* Padding lives on .card so backdrop-click detection can tell the card
+     apart from the dialog box itself. */
+  padding: 0;
+  width: calc(100% - 48px);
+  max-width: 340px;
+  background: var(--bt-white);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+
+.card {
+  padding: 22px 20px 18px;
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--bt-felt-dark) 65%, transparent);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--bt-text-xl);
+}
+
+.body {
+  margin: 10px 0 18px;
+  font-size: var(--bt-text-md);
+  font-weight: 600;
+  color: var(--bt-text-muted);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 13px 0;
+  border: none;
+  border-radius: var(--bt-radius-sm);
+  font-weight: 800;
+  font-size: var(--bt-text-md);
+}
+
+.cancel {
+  background: var(--bt-cream);
+  border: 2px solid var(--bt-line);
+  color: var(--bt-ink);
+}
+
+.confirm {
+  background: var(--bt-yellow);
+  color: var(--bt-ink);
+  box-shadow: 0 3px 0 var(--bt-yellow-deep);
+}
+
+.confirm.danger {
+  background: var(--bt-pickup);
+  color: var(--bt-white);
+  box-shadow: 0 3px 0 var(--bt-pickup-deep);
+}
