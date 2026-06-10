@@ -1,0 +1,98 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 56px;
+}
+
+.logo {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 6px rgba(255, 255, 255, 0.14);
+}
+
+.title {
+  margin: 26px 0 0;
+  color: var(--bt-yellow);
+  font-size: var(--bt-text-hero);
+  line-height: 0.98;
+  text-align: center;
+  letter-spacing: 0.02em;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.32);
+}
+
+/* "— BACKYARD 9 —": kicker flanked by short rules. */
+.kicker {
+  margin: 14px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--bt-fairway-light);
+  font-weight: 600;
+  font-size: var(--bt-text-sm);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.rule {
+  width: 28px;
+  height: 2px;
+  background: var(--bt-fairway-mid);
+}
+
+/* Round-in-progress strip: a scoreboard well that resumes the Scorecard. */
+.resume {
+  margin: 30px var(--bt-space-5) 0;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--bt-space-3);
+  background: var(--bt-felt-shadow);
+  border-radius: var(--bt-radius-md);
+  box-shadow: var(--bt-shadow-well);
+  text-align: left;
+  text-decoration: none;
+}
+
+.resumeKicker {
+  display: block;
+  color: var(--bt-fairway-light);
+  font-size: var(--bt-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--bt-track-wide);
+  text-transform: uppercase;
+}
+
+.resumeLine {
+  display: block;
+  margin-top: 3px;
+  color: var(--bt-white);
+  font-family: var(--bt-font-display);
+  font-size: var(--bt-text-lg);
+  letter-spacing: 0.03em;
+}
+
+.resumeChip {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  background: var(--bt-yellow);
+  color: var(--bt-ink);
+  font-weight: 800;
+  font-size: var(--bt-text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--bt-radius-sm);
+  box-shadow: 0 3px 0 var(--bt-yellow-deep);
+}
+
+.actions {
+  margin-top: auto;
+  padding: 40px var(--bt-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bt-space-3);
+}
