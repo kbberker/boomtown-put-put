@@ -49,12 +49,8 @@ describe('App navigation', () => {
     expect(
       screen.getByRole('heading', { name: /scorecard/i }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole('rowheader', { name: 'Player 1' }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('rowheader', { name: 'Player 2' }),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Player 1')).toBeInTheDocument()
+    expect(screen.getByText('Player 2')).toBeInTheDocument()
   })
 
   it('preserves an in-progress Round across a reload and resumes with Scores intact', async () => {
@@ -68,7 +64,7 @@ describe('App navigation', () => {
     // Start a Round and enter Scores on the first Hole.
     await user.click(screen.getByRole('link', { name: /new round/i }))
     await user.click(screen.getByRole('button', { name: /tee off/i }))
-    await user.click(screen.getAllByRole('link')[0])
+    await user.click(screen.getByRole('link', { name: /score hole 1/i }))
     const plus = (name: string) =>
       screen.getByRole('button', { name: `Increase ${name}'s score` })
     for (let i = 0; i < 3; i++) await user.click(plus('Player 1'))
@@ -91,7 +87,7 @@ describe('App navigation', () => {
     ).toBeInTheDocument()
 
     // The entered Scores survived the reload (Totals reflect them).
-    expect(screen.getByLabelText('Total: 3')).toBeInTheDocument()
-    expect(screen.getByLabelText('Total: 5')).toBeInTheDocument()
+    expect(screen.getByLabelText('Player 1 total: 3')).toBeInTheDocument()
+    expect(screen.getByLabelText('Player 2 total: 5')).toBeInTheDocument()
   })
 })
