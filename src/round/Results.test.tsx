@@ -6,11 +6,14 @@ import { Results } from './Results'
 import { createRound, saveRound, setScore, loadRound } from './roundModel'
 import { HOLE_COUNT } from '../holes/holesConfig'
 
+const user = userEvent.setup()
+
 function renderResults() {
   render(
     <MemoryRouter initialEntries={['/results']}>
       <Routes>
         <Route path="/" element={<div>HOME</div>} />
+        <Route path="/scorecard" element={<div>SCORECARD</div>} />
         <Route path="/results" element={<Results />} />
       </Routes>
     </MemoryRouter>,
@@ -40,43 +43,64 @@ describe('Results', () => {
     expect(items[1]).toMatch(/alice/i)
   })
 
-  it('declares the lowest-Total Player the Winner in a complete Round', () => {
+  it('crowns the lowest-Total Player the Winner in a complete Round', () => {
     let round = fullyScoredRound(['Alice', 'Bob'])
     round = setScore(round, 1, 0, 1) // Bob one stroke better
     saveRound(round)
 
     renderResults()
 
-    expect(screen.getByText(/^winner:/i)).toHaveTextContent(/bob/i)
+    // The champion's name headlines the screen.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/bob/i)
+    // A single-winner badge names the discipline and the winning Total.
+    expect(screen.getByText(/^winner · 17 strokes$/i)).toBeInTheDocument()
   })
 
-  it('names both Players as co-Winners on a tie', () => {
+  it('names both Players as co-Winners joined with " & " on a tie', () => {
     saveRound(fullyScoredRound(['Alice', 'Bob'])) // identical Scores -> tie
 
     renderResults()
 
-    const banner = screen.getByText(/^co-winners:/i)
-    expect(banner).toHaveTextContent(/alice/i)
-    expect(banner).toHaveTextContent(/bob/i)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      /alice & bob/i,
+    )
+    expect(screen.getByText(/^co-winners · 18 strokes$/i)).toBeInTheDocument()
   })
 
-  it('shows no Winner for an incomplete Round finished early', () => {
+  it('shows NO WINNER for an incomplete Round finished early', () => {
     saveRound(setScore(createRound(['Alice', 'Bob']), 0, 0, 1))
 
     renderResults()
 
-    expect(screen.getByText(/no winner — incomplete/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 1, name: /no winner/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/round finished early — not every hole was scored/i),
+    ).toBeInTheDocument()
+    // No winner badge on an incomplete Round.
+    expect(screen.queryByText(/strokes/i)).toBeNull()
   })
 
-  it('clears the active Round and returns Home on leaving', async () => {
-    const user = userEvent.setup()
+  it('clears the active Round and returns Home on Done', async () => {
     saveRound(fullyScoredRound(['Alice']))
 
     renderResults()
-    await user.click(screen.getByRole('button', { name: /home/i }))
+    await user.click(screen.getByRole('button', { name: /back to home/i }))
 
     expect(screen.getByText('HOME')).toBeInTheDocument()
     expect(loadRound()).toBeNull()
+  })
+
+  it('returns to the Scorecard without clearing the Round', async () => {
+    saveRound(fullyScoredRound(['Alice']))
+
+    renderResults()
+    await user.click(screen.getByRole('button', { name: /back to scorecard/i }))
+
+    expect(screen.getByText('SCORECARD')).toBeInTheDocument()
+    // The Round stays active so the group can fix a Score.
+    expect(loadRound()).not.toBeNull()
   })
 
   it('shows a message when there is no active Round', () => {
