@@ -1,13 +1,22 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   HOLE_COUNT,
   DEFAULT_PAR,
   defaultHoles,
   loadHoles,
   saveHoles,
+  refreshHoles,
   isHoleArray,
   type Hole,
 } from './holesConfig'
+
+function stubFetch(impl: () => Promise<Response>) {
+  vi.stubGlobal('fetch', vi.fn(impl))
+}
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), { status })
+}
 
 describe('holesConfig', () => {
   describe('defaultHoles', () => {
@@ -46,6 +55,60 @@ describe('holesConfig', () => {
     it('falls back to defaults when stored data is corrupt', () => {
       localStorage.setItem('putt-putt:holes', 'not json{')
       expect(loadHoles()).toEqual(defaultHoles())
+    })
+  })
+
+  describe('refreshHoles', () => {
+    it('fetches the shared course from /api/holes', async () => {
+      stubFetch(() => Promise.resolve(jsonResponse(defaultHoles())))
+      await refreshHoles()
+      expect(fetch).toHaveBeenCalledWith('/api/holes')
+    })
+
+    it('re-caches and returns the fetched course on success', async () => {
+      const shared: Hole[] = defaultHoles()
+      shared[2] = { name: 'The Windmill', par: 4 }
+      stubFetch(() => Promise.resolve(jsonResponse(shared)))
+
+      const result = await refreshHoles()
+
+      expect(result).toEqual(shared)
+      // localStorage is now a cache: a synchronous load sees the fresh course.
+      expect(loadHoles()).toEqual(shared)
+    })
+
+    it('keeps the cached course when the network is unavailable', async () => {
+      const cached: Hole[] = defaultHoles()
+      cached[0] = { name: 'Loop the Loop', par: 2 }
+      saveHoles(cached)
+      stubFetch(() => Promise.reject(new Error('offline')))
+
+      const result = await refreshHoles()
+
+      expect(result).toEqual(cached)
+      expect(loadHoles()).toEqual(cached)
+    })
+
+    it('falls back to defaults when offline with nothing cached', async () => {
+      stubFetch(() => Promise.reject(new Error('offline')))
+      expect(await refreshHoles()).toEqual(defaultHoles())
+    })
+
+    it('ignores an invalid response body and keeps the cache', async () => {
+      const cached: Hole[] = defaultHoles()
+      cached[0] = { name: 'Loop the Loop', par: 2 }
+      saveHoles(cached)
+      stubFetch(() => Promise.resolve(jsonResponse({ not: 'a course' })))
+
+      const result = await refreshHoles()
+
+      expect(result).toEqual(cached)
+      expect(loadHoles()).toEqual(cached)
+    })
+
+    it('ignores a non-OK response and keeps the cache', async () => {
+      stubFetch(() => Promise.resolve(jsonResponse(defaultHoles(), 500)))
+      expect(await refreshHoles()).toEqual(defaultHoles())
     })
   })
 
