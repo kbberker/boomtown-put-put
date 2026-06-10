@@ -13,9 +13,10 @@ one Round is active at a time; starting a new Round discards any in-progress one
 _Avoid_: Game, game session, match
 
 **Scorecard**:
-The read-only overview of a Round — Players by Holes, with running totals. Acts
-as the hub: each Hole is tappable to open its Hole Entry Page. A representation
-of the Round, not a separate concept.
+The read-only overview of a Round — every Player's Score on every Hole, with
+running Totals. Acts as the hub: each Hole is tappable to open its Hole Entry
+Page. A representation of the Round, not a separate concept (its on-screen
+orientation is a layout choice, not part of the definition).
 _Avoid_: Scoresheet
 
 **Hole Entry Page**:
