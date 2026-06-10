@@ -16,6 +16,9 @@ dist-ssr
 # needed out of it instead, e.g. the optimized logo in src/assets/).
 src/assets/design_handoff_boomtown_ui/
 
+# Notes from human
+docs/future-work.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
