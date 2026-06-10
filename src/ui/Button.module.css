@@ -1,0 +1,58 @@
+/* Chunky arcade buttons — pair every solid variant with .bt-press. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--bt-radius-md);
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Solid CTA: John yellow with the hard chunk shadow. */
+.cta {
+  background: var(--bt-yellow);
+  color: var(--bt-ink);
+  box-shadow: 0 var(--bt-chunk) 0 var(--bt-yellow-deep);
+  font-family: var(--bt-font-display);
+  font-weight: 400;
+  font-size: var(--bt-text-lg);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 15px 0;
+}
+
+.big {
+  font-size: var(--bt-text-xl);
+  padding: 19px 0;
+}
+
+/* Ghost on felt: translucent white glass. */
+.ghostDark {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  color: var(--bt-white);
+  font-size: var(--bt-text-md);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 0;
+}
+
+/* Ghost on cream: white card with a hairline border. */
+.ghostLight {
+  background: var(--bt-white);
+  border: 2.5px solid var(--bt-line);
+  color: var(--bt-fairway-deep);
+  font-size: var(--bt-text-md);
+  letter-spacing: 0.04em;
+  padding: 14px 0;
+}
