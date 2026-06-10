@@ -1,0 +1,18 @@
+[build]
+  command = "pnpm build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Route /api/* to Netlify Functions. Scaffolding for the not-yet-existing
+# GET/PUT /api/holes endpoints (ADR-0003); functions land in later slices.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback: serve index.html so React Router handles client-side routes.
+# Must come after the /api/* rule so API calls aren't swallowed by the app.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

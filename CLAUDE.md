@@ -58,3 +58,4 @@ Architectural decisions and their rationale live in `docs/adr/`:
 
 - `0001` — localStorage-only persistence
 - `0002` — styling stack: native CSS + CSS Modules, no headless UI library
+- `0003` — shared Hole config (Netlify Blobs + functions, PIN-gated writes)
