@@ -36,3 +36,25 @@ fluid, `max-width`-capped container, not a fixed desktop column.
   eventual richer form is a styled native radio group, not a library widget.
 - Re-evaluate the headless-library decision only when a genuinely non-native,
   accessibility-hard widget appears.
+
+## Update (2026-06-09) — design handoff adopted
+
+The deferred design task landed (the `design_handoff_boomtown_ui` bundle). Three
+points above are now superseded; the core verdict (native CSS + Modules, no
+headless library) still holds.
+
+- **The real palette and type are now adopted.** The `--bt-*` token system
+  (greens/yellow/blue pulled from the logo, Anton + Barlow fonts, 4px spacing,
+  the "arcade chunk" button shadow) replaces the neutral placeholder tokens in
+  `base.css`. Dark mode remains out of scope.
+- **The score control is a stepper, not a radio group.** The handoff specifies a
+  −/value/+ stepper (native `<button>`s mutating a value) as core to the arcade
+  identity, so we build that instead of the native radio group named above.
+  Trade-off accepted: entering a 9 ("picked up") costs several taps; the buttons
+  carry accessible labels and the value uses `aria-live` for parity.
+- **One focus-trapped modal now exists.** A single reusable confirm dialog
+  (replacing both `window.confirm` calls) is built on the **native `<dialog>`
+  element** — free focus trap, `Esc`, and backdrop, no dependency — so the
+  no-headless-library verdict still stands rather than being reopened.
+- **Auto-advance was declined.** The handoff shipped auto-advance after Save ON;
+  we keep the existing "Save returns to the Scorecard" contract instead.
