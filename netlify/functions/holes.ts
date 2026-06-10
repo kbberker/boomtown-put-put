@@ -13,19 +13,28 @@ const CACHE_CONTROL = 'public, max-age=60'
 
 /**
  * `GET /api/holes` — serve the shared course from Blobs, or the built-in
- * defaults when the Blob is empty or holds something that no longer validates.
- * `isHoleArray` guards the stored value so a corrupt Blob can never break reads.
+ * defaults when the Blob is empty, holds something that no longer validates, or
+ * is unreachable. `isHoleArray` guards the stored value and the read is wrapped,
+ * so neither a corrupt Blob nor a Blobs outage can break reads (ADR-0003).
  */
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'GET') {
     return new Response('Method Not Allowed', { status: 405 })
   }
 
-  const store = getStore(STORE_NAME)
-  const stored = await store.get(KEY, { type: 'json' })
-  const holes = isHoleArray(stored) ? stored : defaultHoles()
+  const holes = await readCourse()
 
   return Response.json(holes, {
     headers: { 'Cache-Control': CACHE_CONTROL },
   })
+}
+
+async function readCourse() {
+  try {
+    const stored = await getStore(STORE_NAME).get(KEY, { type: 'json' })
+    if (isHoleArray(stored)) return stored
+  } catch {
+    // Blobs unavailable — fall through to the built-in defaults.
+  }
+  return defaultHoles()
 }

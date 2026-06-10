@@ -47,6 +47,15 @@ describe('GET /api/holes', () => {
     expect(await res.json()).toEqual(defaultHoles())
   })
 
+  it('falls back to defaults when the Blob read throws', async () => {
+    get.mockRejectedValue(new Error('blobs unavailable'))
+
+    const res = await handler(getRequest())
+
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual(defaultHoles())
+  })
+
   it('carries a Cache-Control header so reads are edge-cached', async () => {
     get.mockResolvedValue(null)
 

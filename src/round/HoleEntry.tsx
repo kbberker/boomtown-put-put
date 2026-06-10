@@ -8,7 +8,8 @@ import {
   MAX_SCORE,
   type Round,
 } from './roundModel'
-import { loadHoles, HOLE_COUNT } from '../holes/holesConfig'
+import { HOLE_COUNT } from '../holes/holesConfig'
+import { useHoles } from '../holes/useHoles'
 import { Shell } from '../ui/Shell'
 import { ScreenHeader } from '../ui/ScreenHeader'
 import { Button } from '../ui/Button'
@@ -29,7 +30,7 @@ export function HoleEntry() {
   const holeIndex = Number(holeIndexParam)
 
   const round = loadRound()
-  const holes = loadHoles()
+  const holes = useHoles()
   const hole = holes[holeIndex]
 
   // Draft Scores for this Hole, one per Player (null = not entered), seeded

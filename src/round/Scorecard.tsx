@@ -8,7 +8,8 @@ import {
   nextUnscoredHole,
   MAX_SCORE,
 } from './roundModel'
-import { loadHoles, HOLE_COUNT } from '../holes/holesConfig'
+import { HOLE_COUNT } from '../holes/holesConfig'
+import { useHoles } from '../holes/useHoles'
 import { Shell } from '../ui/Shell'
 import { ScreenHeader } from '../ui/ScreenHeader'
 import { Button, ButtonLink } from '../ui/Button'
@@ -29,7 +30,7 @@ import styles from './Scorecard.module.css'
 export function Scorecard() {
   const navigate = useNavigate()
   const round = loadRound()
-  const holes = loadHoles()
+  const holes = useHoles()
   const [confirmFinish, setConfirmFinish] = useState(false)
 
   if (!round) {
