@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import {
   loadRound,
   saveRound,
@@ -7,13 +7,13 @@ import {
   MIN_SCORE,
   MAX_SCORE,
   type Round,
-} from './roundModel'
-import { HOLE_COUNT } from '../holes/holesConfig'
-import { useHoles } from '../holes/useHoles'
-import { Shell } from '../ui/Shell'
-import { ScreenHeader } from '../ui/ScreenHeader'
-import { Button } from '../ui/Button'
-import styles from './HoleEntry.module.css'
+} from "./roundModel";
+import { HOLE_COUNT } from "../holes/holesConfig";
+import { useHoles } from "../holes/useHoles";
+import { Shell } from "../ui/Shell";
+import { ScreenHeader } from "../ui/ScreenHeader";
+import { Button } from "../ui/Button";
+import styles from "./HoleEntry.module.css";
 
 /**
  * The Hole Entry Page: the per-Hole screen for entering every Player's Score on
@@ -25,20 +25,20 @@ import styles from './HoleEntry.module.css'
  * auto-advance. Re-opening a scored Hole pre-fills the existing Scores.
  */
 export function HoleEntry() {
-  const navigate = useNavigate()
-  const { holeIndex: holeIndexParam } = useParams()
-  const holeIndex = Number(holeIndexParam)
+  const navigate = useNavigate();
+  const { holeIndex: holeIndexParam } = useParams();
+  const holeIndex = Number(holeIndexParam);
 
-  const round = loadRound()
-  const holes = useHoles()
-  const hole = holes[holeIndex]
+  const round = loadRound();
+  const holes = useHoles();
+  const hole = holes[holeIndex];
 
   // Draft Scores for this Hole, one per Player (null = not entered), seeded
   // from any existing Scores so re-opening a scored Hole shows current values.
   const [draft, setDraft] = useState<(number | null)[]>(() =>
     round ? round.players.map((p) => p.scores[holeIndex] ?? null) : [],
-  )
-  const [error, setError] = useState<string | null>(null)
+  );
+  const [error, setError] = useState<string | null>(null);
 
   if (!round) {
     return (
@@ -46,7 +46,7 @@ export function HoleEntry() {
         <ScreenHeader title="Hole Entry" />
         <p className={styles.emptyState}>No active Round.</p>
       </Shell>
-    )
+    );
   }
 
   if (!hole) {
@@ -55,12 +55,12 @@ export function HoleEntry() {
         <ScreenHeader title="Hole Entry" />
         <p className={styles.emptyState}>No such Hole.</p>
       </Shell>
-    )
+    );
   }
 
   // round is narrowed to non-null above; capture so the Save closure keeps
   // the narrowing.
-  const activeRound = round
+  const activeRound = round;
 
   function increase(playerIndex: number) {
     setDraft((current) =>
@@ -71,7 +71,7 @@ export function HoleEntry() {
             : Math.min(value + 1, MAX_SCORE)
           : value,
       ),
-    )
+    );
   }
 
   function decrease(playerIndex: number) {
@@ -81,30 +81,30 @@ export function HoleEntry() {
           ? value - 1
           : value,
       ),
-    )
+    );
   }
 
   function handleSave() {
     if (draft.some((value) => value === null)) {
-      setError('Every Player needs a Score from 1 to 9.')
-      return
+      setError("Every Player needs a Score from 1 to 9.");
+      return;
     }
-    let updated: Round = activeRound
+    let updated: Round = activeRound;
     draft.forEach((value, playerIndex) => {
-      updated = setScore(updated, playerIndex, holeIndex, value as number)
-    })
-    saveRound(updated)
-    navigate('/scorecard')
+      updated = setScore(updated, playerIndex, holeIndex, value as number);
+    });
+    saveRound(updated);
+    navigate("/scorecard");
   }
 
-  const scored = draft.filter((value) => value !== null).length
+  const scored = draft.filter((value) => value !== null).length;
 
   return (
     <Shell>
       <ScreenHeader
         kicker={`Hole ${holeIndex + 1} of ${HOLE_COUNT} · Par ${hole.par}`}
         title={hole.name}
-        back={{ to: '/scorecard', label: 'Scorecard' }}
+        back={{ to: "/scorecard", label: "Scorecard" }}
       />
 
       <section className={styles.content}>
@@ -113,9 +113,9 @@ export function HoleEntry() {
         <fieldset className={styles.scores}>
           <legend className={styles.srOnly}>Scores</legend>
           {round.players.map((player, playerIndex) => {
-            const value = draft[playerIndex]
-            const blank = value === null
-            const pickedUp = value === MAX_SCORE
+            const value = draft[playerIndex];
+            const blank = value === null;
+            const pickedUp = value === MAX_SCORE;
             return (
               <div
                 key={playerIndex}
@@ -143,7 +143,7 @@ export function HoleEntry() {
                     data-picked-up={pickedUp}
                     aria-live="polite"
                   >
-                    {value ?? '–'}
+                    {value ?? "–"}
                   </div>
                   <button
                     type="button"
@@ -156,7 +156,7 @@ export function HoleEntry() {
                   </button>
                 </div>
               </div>
-            )
+            );
           })}
         </fieldset>
 
@@ -171,5 +171,5 @@ export function HoleEntry() {
         </Button>
       </div>
     </Shell>
-  )
+  );
 }

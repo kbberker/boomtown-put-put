@@ -50,7 +50,7 @@
   box-shadow: var(--bt-shadow-card);
 }
 
-.holeRow[data-up-next='true'] {
+.holeRow[data-up-next="true"] {
   border-color: var(--bt-yellow);
 }
 
@@ -83,7 +83,7 @@
   color: var(--bt-text-muted);
 }
 
-.holePar[data-up-next='true'] {
+.holePar[data-up-next="true"] {
   color: var(--bt-yellow-deep);
 }
 
@@ -102,16 +102,16 @@
   color: var(--bt-ink);
 }
 
-.score[data-blank='true'] {
+.score[data-blank="true"] {
   color: var(--bt-text-faint);
 }
 
-.score[data-picked-up='true'] {
+.score[data-picked-up="true"] {
   color: var(--bt-pickup);
 }
 
 /* Hole-in-one: filled yellow chip. */
-.score[data-ace='true'] {
+.score[data-ace="true"] {
   background: var(--bt-yellow);
   box-shadow: 0 2px 0 var(--bt-yellow-deep);
 }
@@ -141,7 +141,7 @@
   color: var(--bt-white);
 }
 
-.total[data-leader='true'] {
+.total[data-leader="true"] {
   color: var(--bt-yellow);
 }
 

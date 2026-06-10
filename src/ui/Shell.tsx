@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import styles from './Shell.module.css'
+import type { ReactNode } from "react";
+import styles from "./Shell.module.css";
 
 /**
  * Phone-width screen shell. Functional screens sit on cream; the marquee
@@ -9,12 +9,12 @@ export function Shell({
   felt = false,
   children,
 }: {
-  felt?: boolean
-  children: ReactNode
+  felt?: boolean;
+  children: ReactNode;
 }) {
   return (
     <div className={felt ? `${styles.shell} ${styles.felt}` : styles.shell}>
       {children}
     </div>
-  )
+  );
 }

@@ -1,26 +1,26 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   createRound,
   loadRound,
   saveRound,
   MIN_PLAYERS,
   MAX_PLAYERS,
-} from './roundModel'
-import { Shell } from '../ui/Shell'
-import { ScreenHeader } from '../ui/ScreenHeader'
-import { Button } from '../ui/Button'
-import { ConfirmDialog } from '../ui/ConfirmDialog'
-import styles from './NewRound.module.css'
+} from "./roundModel";
+import { Shell } from "../ui/Shell";
+import { ScreenHeader } from "../ui/ScreenHeader";
+import { Button } from "../ui/Button";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
+import styles from "./NewRound.module.css";
 
-const INITIAL_PLAYER_COUNT = 2
+const INITIAL_PLAYER_COUNT = 2;
 
 function defaultName(index: number): string {
-  return `Player ${index + 1}`
+  return `Player ${index + 1}`;
 }
 
 function initialNames(): string[] {
-  return Array.from({ length: INITIAL_PLAYER_COUNT }, (_, i) => defaultName(i))
+  return Array.from({ length: INITIAL_PLAYER_COUNT }, (_, i) => defaultName(i));
 }
 
 /**
@@ -29,13 +29,13 @@ function initialNames(): string[] {
  * locks the roster into a fresh Round and persists it as the active Round.
  */
 export function NewRound() {
-  const navigate = useNavigate()
-  const [names, setNames] = useState<string[]>(initialNames)
-  const [error, setError] = useState<string | null>(null)
-  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const navigate = useNavigate();
+  const [names, setNames] = useState<string[]>(initialNames);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   function updateName(index: number, value: string) {
-    setNames((current) => current.map((n, i) => (i === index ? value : n)))
+    setNames((current) => current.map((n, i) => (i === index ? value : n)));
   }
 
   function addPlayer() {
@@ -43,7 +43,7 @@ export function NewRound() {
       current.length >= MAX_PLAYERS
         ? current
         : [...current, defaultName(current.length)],
-    )
+    );
   }
 
   function removePlayer(index: number) {
@@ -51,27 +51,27 @@ export function NewRound() {
       current.length <= MIN_PLAYERS
         ? current
         : current.filter((_, i) => i !== index),
-    )
+    );
   }
 
   function startRound() {
-    saveRound(createRound(names))
-    navigate('/scorecard')
+    saveRound(createRound(names));
+    navigate("/scorecard");
   }
 
   function handleTeeOff() {
-    if (!names.every((n) => n.trim() !== '')) {
-      setError('Every Player needs a name.')
-      return
+    if (!names.every((n) => n.trim() !== "")) {
+      setError("Every Player needs a name.");
+      return;
     }
-    setError(null)
+    setError(null);
     // Only one Round is active at a time (ADR-0001). If one is in progress,
     // starting overwrites it, so confirm before discarding it.
     if (loadRound() !== null) {
-      setConfirmDiscard(true)
-      return
+      setConfirmDiscard(true);
+      return;
     }
-    startRound()
+    startRound();
   }
 
   return (
@@ -79,7 +79,7 @@ export function NewRound() {
       <ScreenHeader
         kicker="Assemble the group"
         title="New Round"
-        back={{ to: '/', label: 'Home' }}
+        back={{ to: "/", label: "Home" }}
       />
 
       <section className={styles.content}>
@@ -96,7 +96,7 @@ export function NewRound() {
                 type="text"
                 required
                 aria-label={`Player ${index + 1} name`}
-                aria-invalid={name.trim() === ''}
+                aria-invalid={name.trim() === ""}
                 value={name}
                 onChange={(e) => updateName(index, e.target.value)}
                 onFocus={(e) => e.currentTarget.select()}
@@ -143,11 +143,11 @@ export function NewRound() {
         confirmLabel="Discard & start"
         danger
         onConfirm={() => {
-          setConfirmDiscard(false)
-          startRound()
+          setConfirmDiscard(false);
+          startRound();
         }}
         onCancel={() => setConfirmDiscard(false)}
       />
     </Shell>
-  )
+  );
 }

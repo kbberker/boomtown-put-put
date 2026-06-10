@@ -44,7 +44,7 @@ _Avoid_: Strokes, points
 The sum of a Player's Scores across all entered Holes. Lowest Total wins.
 
 **Winner**:
-The Player with the lowest Total in a *complete* Round (all Players scored on
+The Player with the lowest Total in a _complete_ Round (all Players scored on
 all Holes). Ties yield co-Winners with no tiebreaker. An incomplete Round has no
 Winner, even if finished early.
 

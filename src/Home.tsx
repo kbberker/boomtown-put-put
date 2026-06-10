@@ -1,16 +1,16 @@
-import { Link } from 'react-router'
-import { loadRound, nextUnscoredHole } from './round/roundModel'
-import { Shell } from './ui/Shell'
-import { ButtonLink } from './ui/Button'
-import logo from './assets/boomtown-john-logo.png'
-import styles from './Home.module.css'
+import { Link } from "react-router";
+import { loadRound, nextUnscoredHole } from "./round/roundModel";
+import { Shell } from "./ui/Shell";
+import { ButtonLink } from "./ui/Button";
+import logo from "./assets/boomtown-john-logo.png";
+import styles from "./Home.module.css";
 
 /** The app's single entry point. */
 export function Home() {
   // Surface a Round in progress so a refresh-discarded tab can return to it.
   // It is offered, not auto-loaded — the Scorekeeper chooses to resume (ADR-0001).
-  const round = loadRound()
-  const nextHole = round === null ? null : nextUnscoredHole(round)
+  const round = loadRound();
+  const nextHole = round === null ? null : nextUnscoredHole(round);
 
   return (
     <Shell felt>
@@ -37,9 +37,9 @@ export function Home() {
           <span>
             <span className={styles.resumeKicker}>Round in progress</span>
             <span className={styles.resumeLine}>
-              {nextHole === null ? 'ALL HOLES SCORED' : `HOLE ${nextHole + 1}`}
-              {' · '}
-              {round.players.length} PLAYER{round.players.length > 1 ? 'S' : ''}
+              {nextHole === null ? "ALL HOLES SCORED" : `HOLE ${nextHole + 1}`}
+              {" · "}
+              {round.players.length} PLAYER{round.players.length > 1 ? "S" : ""}
             </span>
           </span>
           <span className={styles.resumeChip}>Resume</span>
@@ -55,5 +55,5 @@ export function Home() {
         </ButtonLink>
       </nav>
     </Shell>
-  )
+  );
 }
