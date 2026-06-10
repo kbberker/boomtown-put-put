@@ -5,6 +5,7 @@ import {
   defaultHoles,
   loadHoles,
   saveHoles,
+  isHoleArray,
   type Hole,
 } from './holesConfig'
 
@@ -45,6 +46,27 @@ describe('holesConfig', () => {
     it('falls back to defaults when stored data is corrupt', () => {
       localStorage.setItem('putt-putt:holes', 'not json{')
       expect(loadHoles()).toEqual(defaultHoles())
+    })
+  })
+
+  describe('isHoleArray', () => {
+    it('accepts a well-formed 9-hole array', () => {
+      expect(isHoleArray(defaultHoles())).toBe(true)
+    })
+
+    it('rejects the wrong length', () => {
+      expect(isHoleArray([{ name: 'Hole 1', par: 3 }])).toBe(false)
+    })
+
+    it('rejects entries with the wrong field types', () => {
+      const holes: unknown[] = defaultHoles()
+      holes[0] = { name: 'Hole 1', par: 'three' }
+      expect(isHoleArray(holes)).toBe(false)
+    })
+
+    it('rejects non-array values', () => {
+      expect(isHoleArray(null)).toBe(false)
+      expect(isHoleArray({ holes: [] })).toBe(false)
     })
   })
 

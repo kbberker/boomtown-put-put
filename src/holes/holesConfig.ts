@@ -49,7 +49,12 @@ function tryParseHoles(raw: string): Hole[] | null {
   }
 }
 
-function isHoleArray(value: unknown): value is Hole[] {
+/**
+ * Guard for a well-formed course: exactly {@link HOLE_COUNT} holes, each with a
+ * string name and numeric par. Used to validate the cache, the fetched
+ * `GET /api/holes` response, and the `PUT /api/holes` body (ADR-0003).
+ */
+export function isHoleArray(value: unknown): value is Hole[] {
   return (
     Array.isArray(value) &&
     value.length === HOLE_COUNT &&
