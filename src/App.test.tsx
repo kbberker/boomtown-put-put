@@ -15,7 +15,7 @@ describe('App navigation', () => {
 
     // Home is the entry point.
     expect(
-      screen.getByRole('heading', { name: /putt putt/i }),
+      screen.getByRole('heading', { name: /put put/i }),
     ).toBeInTheDocument()
 
     // Open Hole Setup.
@@ -25,7 +25,7 @@ describe('App navigation', () => {
     // Done returns to Home.
     await user.click(screen.getByRole('button', { name: /done/i }))
     expect(
-      screen.getByRole('heading', { name: /putt putt/i }),
+      screen.getByRole('heading', { name: /put put/i }),
     ).toBeInTheDocument()
     expect(screen.queryByLabelText(/hole name/i)).toBeNull()
   })
@@ -82,8 +82,8 @@ describe('App navigation', () => {
       </MemoryRouter>,
     )
 
-    // Home surfaces Resume Round; resuming returns to the Scorecard.
-    await user.click(screen.getByRole('link', { name: /resume round/i }))
+    // Home surfaces the resume strip; resuming returns to the Scorecard.
+    await user.click(screen.getByRole('link', { name: /resume/i }))
     expect(
       screen.getByRole('heading', { name: /scorecard/i }),
     ).toBeInTheDocument()
