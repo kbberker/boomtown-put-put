@@ -6,38 +6,82 @@
  * CSS Modules. Everything here is wrapped in `@layer base` so component
  * styles (unlayered) always win the cascade without specificity battles.
  *
- * Token values, the reset, and element defaults are working PLACEHOLDERS.
- * The real palette, spacing scale, and dark mode are a deferred design task.
+ * Tokens are the Boomtown design system (`--bt-*`), palette pulled from the
+ * John logo. Use these everywhere; never hard-code a value that has a token.
+ * Anton (display) + Barlow (body) are self-hosted via @fontsource imports in
+ * main.tsx — no third-party font request (offline-capable per ADR-0001).
  */
 
 @layer base {
   :root {
-    /* Neutral light placeholder palette — not the final design. */
-    --color-bg: #ffffff;
-    --color-surface: #f5f5f5;
-    --color-text: #1a1a1a;
-    --color-muted: #555555;
-    --color-border: #d4d4d4;
-    --color-accent: #2563eb;
-    --color-accent-text: #ffffff;
-    --color-invalid: #b91c1c;
+    /* ---- Color · greens (the course) ---- */
+    --bt-fairway-deep: #15602a; /* dark ring of the logo; headers, shadows */
+    --bt-fairway: #27803b; /* primary green; header bars, fills */
+    --bt-fairway-mid: #5fae63; /* mid ring; secondary accents */
+    --bt-fairway-light: #a9d6a4; /* light ring; muted text on green */
+    --bt-fairway-pale: #ddeed6; /* palest ring; chips, subtle fills */
+    --bt-felt-dark: #0e4520; /* vignette edge of the night felt */
+    --bt-felt-shadow: #0d3a1b; /* inset scoreboard wells */
 
-    /* Spacing + sizing placeholders. */
-    --space-1: 0.25rem;
-    --space-2: 0.5rem;
-    --space-3: 1rem;
-    --space-4: 1.5rem;
-    --space-5: 2rem;
-    --radius: 0.375rem;
-    --content-max: 40rem;
+    /* ---- Color · accents ---- */
+    --bt-yellow: #ffd21e; /* John yellow; primary CTA */
+    --bt-yellow-deep: #f0b900; /* CTA chunk shadow */
+    --bt-blue: #2e6fd8; /* sunglasses blue; sparing accent */
+    --bt-pickup: #e05a3a; /* "picked up" / max score warning */
+    --bt-pickup-deep: #b4452c;
 
-    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    /* ---- Color · neutrals ---- */
+    --bt-ink: #15181a; /* near-black outline color */
+    --bt-white: #ffffff;
+    --bt-cream: #faf6ec; /* clubhouse cream; light screen bg */
+    --bt-text-muted: #7a8478; /* secondary text on light */
+    --bt-text-faint: #b8c0b6; /* disabled / empty states */
+    --bt-line: #e4eadf; /* hairlines on cream */
+
+    /* ---- Color · validation ---- */
+    --bt-error-bg: #fdeae4;
+    --bt-error-border: #f2c4b6;
+
+    /* ---- Type ---- */
+    --bt-font-display: 'Anton', 'Arial Narrow', sans-serif;
+    --bt-font-body: 'Barlow', 'Helvetica Neue', sans-serif;
+    --bt-text-xs: 12px;
+    --bt-text-sm: 14px;
+    --bt-text-md: 16px;
+    --bt-text-lg: 19px;
+    --bt-text-xl: 24px;
+    --bt-text-2xl: 32px;
+    --bt-text-hero: 48px;
+    --bt-track-wide: 0.18em; /* uppercase label tracking */
+
+    /* ---- Space (4px base) ---- */
+    --bt-space-1: 4px;
+    --bt-space-2: 8px;
+    --bt-space-3: 12px;
+    --bt-space-4: 16px;
+    --bt-space-5: 20px;
+    --bt-space-6: 24px;
+    --bt-space-8: 32px;
+
+    /* ---- Radius & elevation ---- */
+    --bt-radius-sm: 9px;
+    --bt-radius-md: 14px; /* cards, buttons */
+    --bt-radius-lg: 18px;
+    --bt-radius-pill: 999px;
+    --bt-chunk: 4px; /* the "arcade button" hard drop shadow size */
+    --bt-shadow-card: 0 2px 0 rgba(21, 96, 42, 0.12);
+    --bt-shadow-well: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+
+    /* ---- Motion ---- */
+    --bt-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --bt-quick: 140ms;
 
     color-scheme: light;
-    color: var(--color-text);
-    background: var(--color-bg);
-    font-family: var(--font-sans);
+    color: var(--bt-ink);
+    background: var(--bt-felt-dark);
+    font-family: var(--bt-font-body);
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* Minimal reset. */
@@ -52,29 +96,31 @@
     min-height: 100svh;
   }
 
-  /* Mobile-first container: fluid below the cap, centred on wide viewports. */
+  /* The screen Shell owns the 430px column; the root just stretches. */
   #root {
-    width: 100%;
-    max-width: var(--content-max);
-    margin-inline: auto;
-    padding: var(--space-4) var(--space-3);
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Semantic-element defaults. */
+  /* Semantic-element defaults: scoreboard headings, body everything else. */
   h1,
   h2,
   h3 {
-    margin: 0 0 var(--space-3);
-    line-height: 1.2;
-    color: var(--color-text);
+    margin: 0 0 var(--bt-space-3);
+    font-family: var(--bt-font-display);
+    font-weight: 400; /* Anton ships a single weight */
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1.15;
   }
 
   p {
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--bt-space-3);
   }
 
   a {
-    color: var(--color-accent);
+    color: var(--bt-fairway-deep);
   }
 
   /* Form controls + buttons inherit typography and share a baseline look. */
@@ -89,30 +135,55 @@
   input,
   select,
   textarea {
-    padding: var(--space-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-bg);
+    padding: var(--bt-space-3);
+    border: 2px solid var(--bt-line);
+    border-radius: var(--bt-radius-sm);
+    background: var(--bt-white);
   }
 
   :is(input, select, textarea)[aria-invalid='true'] {
-    border-color: var(--color-invalid);
+    border-color: var(--bt-pickup);
   }
 
+  /* Plain buttons get the quiet light look; chunky CTAs are a component. */
   button {
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
+    min-height: 44px;
+    padding: var(--bt-space-2) var(--bt-space-4);
+    border: 2px solid var(--bt-line);
+    border-radius: var(--bt-radius-sm);
+    background: var(--bt-white);
+    color: var(--bt-fairway-deep);
+    font-weight: 700;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 3px solid var(--bt-blue);
     outline-offset: 2px;
   }
 
+  /* Inline validation banner (screens surface errors via role="alert"). */
   [role='alert'] {
-    color: var(--color-invalid);
+    margin: var(--bt-space-3) 0;
+    padding: 11px 14px;
+    background: var(--bt-error-bg);
+    border: 2px solid var(--bt-error-border);
+    border-radius: var(--bt-radius-sm);
+    color: var(--bt-pickup-deep);
+    font-weight: 700;
+    font-size: var(--bt-text-sm);
+  }
+
+  /* Arcade press feedback: chunky buttons sink into their drop shadow. */
+  .bt-press {
+    transition:
+      transform var(--bt-quick) ease,
+      box-shadow var(--bt-quick) ease;
+  }
+
+  .bt-press:active {
+    transform: translateY(var(--bt-chunk));
+    box-shadow: 0 0 0 transparent !important;
   }
 }

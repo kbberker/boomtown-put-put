@@ -1,0 +1,27 @@
+/*
+ * Phone-width screen shell: fluid below 430px, centered on desktop.
+ * The box-shadow + clip-path pair paints the felt edge-to-edge behind the
+ * column so wide viewports read as a phone screen on a dark felt table.
+ */
+.shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 430px;
+  margin-inline: auto;
+  position: relative;
+  background: var(--bt-cream);
+  box-shadow: 0 0 0 100vmax var(--bt-felt-dark);
+  clip-path: inset(0 -100vmax);
+}
+
+/* Felt variant for the marquee screens (Home, Results). */
+.felt {
+  background: radial-gradient(
+    circle at 50% 28%,
+    var(--bt-fairway) 0%,
+    var(--bt-fairway-deep) 62%,
+    var(--bt-felt-dark) 100%
+  );
+}
