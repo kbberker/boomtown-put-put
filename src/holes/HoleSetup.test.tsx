@@ -39,6 +39,38 @@ describe("HoleSetup", () => {
     expect(pars.every((p) => p.value === "3")).toBe(true);
   });
 
+  it("re-seeds the form from the shared course when the refresh resolves", async () => {
+    // Cache holds the seeded defaults; the shared store has a different course.
+    const shared = defaultHoles();
+    shared[0] = { name: "The Windmill", par: 4 };
+    stubFetch(() => Promise.resolve(jsonResponse(shared)));
+    renderHoleSetup();
+
+    // First paint is from the cache; the inputs update once GET /api/holes lands.
+    const firstName = screen.getAllByLabelText(/hole name/i)[0];
+    expect(firstName).toHaveValue("Hole 1");
+    expect(await screen.findByDisplayValue("The Windmill")).toBeInTheDocument();
+    expect(screen.getAllByLabelText(/par/i)[0]).toHaveValue(4);
+  });
+
+  it("keeps in-progress edits when a refresh lands mid-edit", async () => {
+    // The user starts typing before the (different) shared course arrives.
+    const shared = defaultHoles();
+    shared[0] = { name: "The Windmill", par: 4 };
+    let resolveFetch!: (r: Response) => void;
+    stubFetch(() => new Promise<Response>((resolve) => (resolveFetch = resolve)));
+    renderHoleSetup();
+
+    const firstName = screen.getAllByLabelText(/hole name/i)[0];
+    await user.clear(firstName);
+    await user.type(firstName, "My Edit");
+
+    // The refresh now resolves with a different course — the edit must survive.
+    resolveFetch(jsonResponse(shared));
+    await Promise.resolve();
+    expect(firstName).toHaveValue("My Edit");
+  });
+
   it("does not persist edits until Done is clicked", async () => {
     renderHoleSetup();
 
