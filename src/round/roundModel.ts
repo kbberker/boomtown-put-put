@@ -7,6 +7,11 @@ import { HOLE_COUNT } from "../holes/holesConfig";
 export const MIN_PLAYERS = 1;
 export const MAX_PLAYERS = 6;
 
+// A Player name may be at most 12 characters. This is the single source of the
+// rule; New Round warns and blocks tee-off when a name exceeds it (names are
+// never silently truncated — see the validation in NewRound).
+export const MAX_NAME_LENGTH = 12;
+
 // A Score is "not yet entered" (null) until the Scorekeeper records strokes for
 // that Player on that Hole. scores has one entry per Hole.
 export type Player = {

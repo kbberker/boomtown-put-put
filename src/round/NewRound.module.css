@@ -28,12 +28,19 @@
 
 .playerCard {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   background: var(--bt-white);
   border-radius: var(--bt-radius-md);
   padding: 10px 12px;
   box-shadow: var(--bt-shadow-card);
+}
+
+/* Per-field length warning: breaks onto its own row under the input. */
+.fieldError {
+  flex-basis: 100%;
+  margin: 0;
 }
 
 .numberTile {

@@ -13,6 +13,7 @@ import {
   nextUnscoredHole,
   MIN_PLAYERS,
   MAX_PLAYERS,
+  MAX_NAME_LENGTH,
 } from "./roundModel";
 import { HOLE_COUNT } from "../holes/holesConfig";
 
@@ -27,9 +28,14 @@ describe("roundModel", () => {
     expect(round.players.map((p) => p.name)).toEqual(["Alice", "Bob"]);
   });
 
-  it("trims Player names and permits duplicates", () => {
+  it("trims Player names and permits duplicates, never truncating", () => {
     const round = createRound([" Sam ", "Sam"]);
     expect(round.players.map((p) => p.name)).toEqual(["Sam", "Sam"]);
+    // The model owns the cap as a rule but does not silently truncate names;
+    // an over-long name is stored verbatim (New Round blocks tee-off instead).
+    const long = "Bartholomewson";
+    expect(long.length).toBeGreaterThan(MAX_NAME_LENGTH);
+    expect(createRound([long]).players[0].name).toBe(long);
   });
 
   it("starts every Player with 9 blank Scores (not yet entered)", () => {
