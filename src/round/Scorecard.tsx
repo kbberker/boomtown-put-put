@@ -77,74 +77,82 @@ export function Scorecard() {
       />
 
       <section className={styles.content}>
-        <div className={`${styles.grid} ${styles.namesRow}`} style={gridStyle}>
-          <span className={styles.namesLabel}>Hole</span>
-          {round.players.map((player, i) => (
-            <span key={i} className={styles.playerName} title={player.name}>
-              {player.name}
-            </span>
-          ))}
-        </div>
+        <div className={styles.scroller}>
+          <div
+            className={`${styles.grid} ${styles.namesRow}`}
+            style={gridStyle}
+          >
+            <span className={styles.namesLabel}>Hole</span>
+            {round.players.map((player, i) => (
+              <span key={i} className={styles.playerName} title={player.name}>
+                {player.name}
+              </span>
+            ))}
+          </div>
 
-        <div className={styles.rows}>
-          {holes.map((hole, holeIndex) => {
-            const scored = isHoleScored(round, holeIndex);
-            const upNext = holeIndex === nextHole;
-            return (
-              <Link
-                key={holeIndex}
-                to={`/hole/${holeIndex}`}
-                className={`${styles.grid} ${styles.holeRow} bt-press`}
-                style={gridStyle}
-                data-up-next={upNext}
-                aria-label={`${hole.name}, par ${hole.par}, ${
-                  scored ? "scored" : "not yet scored"
-                } — edit scores`}
-              >
-                <span className={styles.holeCell}>
-                  <span className={styles.holeName}>
-                    <span className={styles.holeNumber}>{holeIndex + 1}</span>
-                    {hole.name}
-                  </span>
-                  <span className={styles.holePar} data-up-next={upNext}>
-                    {upNext ? `Up next · Par ${hole.par}` : `Par ${hole.par}`}
-                  </span>
-                </span>
-                {round.players.map((player, playerIndex) => {
-                  const score = player.scores[holeIndex];
-                  return (
-                    <span key={playerIndex} className={styles.scoreCell}>
-                      <span
-                        className={styles.score}
-                        data-ace={score === 1}
-                        data-blank={score === null}
-                        data-picked-up={score === MAX_SCORE}
-                        aria-label={
-                          score === null ? "not yet entered" : undefined
-                        }
-                      >
-                        {score ?? "·"}
-                      </span>
+          <div className={styles.rows}>
+            {holes.map((hole, holeIndex) => {
+              const scored = isHoleScored(round, holeIndex);
+              const upNext = holeIndex === nextHole;
+              return (
+                <Link
+                  key={holeIndex}
+                  to={`/hole/${holeIndex}`}
+                  className={`${styles.grid} ${styles.holeRow} bt-press`}
+                  style={gridStyle}
+                  data-up-next={upNext}
+                  aria-label={`${hole.name}, par ${hole.par}, ${
+                    scored ? "scored" : "not yet scored"
+                  } — edit scores`}
+                >
+                  <span className={styles.holeCell}>
+                    <span className={styles.holeName}>
+                      <span className={styles.holeNumber}>{holeIndex + 1}</span>
+                      {hole.name}
                     </span>
-                  );
-                })}
-              </Link>
-            );
-          })}
-        </div>
+                    <span className={styles.holePar} data-up-next={upNext}>
+                      {upNext ? `Up next · Par ${hole.par}` : `Par ${hole.par}`}
+                    </span>
+                  </span>
+                  {round.players.map((player, playerIndex) => {
+                    const score = player.scores[holeIndex];
+                    return (
+                      <span key={playerIndex} className={styles.scoreCell}>
+                        <span
+                          className={styles.score}
+                          data-ace={score === 1}
+                          data-blank={score === null}
+                          data-picked-up={score === MAX_SCORE}
+                          aria-label={
+                            score === null ? "not yet entered" : undefined
+                          }
+                        >
+                          {score ?? "·"}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </Link>
+              );
+            })}
+          </div>
 
-        <div className={`${styles.grid} ${styles.totalsRow}`} style={gridStyle}>
-          <span className={styles.totalsLabel}>Total</span>
-          {totals.map((total, i) => (
-            <span
-              key={i}
-              className={styles.total}
-              data-leader={anyScores && total === lowest}
-              aria-label={`${round.players[i].name} total: ${total}`}
-            >
-              {total}
-            </span>
-          ))}
+          <div
+            className={`${styles.grid} ${styles.totalsRow}`}
+            style={gridStyle}
+          >
+            <span className={styles.totalsLabel}>Total</span>
+            {totals.map((total, i) => (
+              <span
+                key={i}
+                className={styles.total}
+                data-leader={anyScores && total === lowest}
+                aria-label={`${round.players[i].name} total: ${total}`}
+              >
+                {total}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 

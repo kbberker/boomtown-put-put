@@ -1,13 +1,36 @@
 .content {
   padding: var(--bt-space-4) 14px 0;
+  /* Min track widths (visually tunable). Player columns comfortably fit a
+     capped 12-char name (#21) so names no longer ellipsis-truncate; the Hole
+     column keeps ~1.6x so hole names aren't crushed. When their combined
+     minimums exceed the row, .scroller takes over with horizontal scroll. */
+  --bt-player-col: 88px;
+  --bt-hole-col: 140px;
 }
 
-/* Shared flipped-grid template: Hole cell + one column per Player. */
+/* Wraps the three grid sections (names, hole rows, totals) so they overflow
+   into native horizontal scroll *together* and stay column-aligned on a narrow
+   viewport. No frozen column and no scroll affordance — overflow only realistically
+   occurs on a narrow portrait phone with 5-6 players, where touch scroll is
+   self-evident (#23 scope). */
+.scroller {
+  overflow-x: auto;
+}
+
+/* Shared flipped-grid template: Hole cell + one column per Player. Player
+   columns are uniform width and grow to fill the row (1fr) but never shrink
+   below their min, so 2-3 players leave no leftover gap on a wide screen. */
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) repeat(var(--players), minmax(0, 1fr));
+  grid-template-columns:
+    minmax(var(--bt-hole-col), 1.6fr)
+    repeat(var(--players), minmax(var(--bt-player-col), 1fr));
   gap: 6px;
   align-items: center;
+  /* Grow to the full column width when overflowing instead of clipping to the
+     container, so each row's background (white card, felt totals well) spans
+     every column under horizontal scroll. A no-op on wide screens. */
+  min-width: min-content;
 }
 
 .namesRow {
