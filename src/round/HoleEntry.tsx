@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import {
-  loadRound,
-  saveRound,
-  setScore,
-  MIN_SCORE,
-  MAX_SCORE,
-  type Round,
-} from "./roundModel";
+import { loadRound, saveRound, setScore, MIN_SCORE, MAX_SCORE } from "./utils";
+import type { Round } from "./roundTypes";
 import { HOLE_COUNT } from "../holes/holesConfig";
 import { useHoles } from "../holes/useHoles";
 import { Shell } from "../ui/Shell";

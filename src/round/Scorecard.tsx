@@ -7,7 +7,7 @@ import {
   unscoredHoleCount,
   nextUnscoredHole,
   MAX_SCORE,
-} from "./roundModel";
+} from "./utils";
 import { HOLE_COUNT } from "../holes/holesConfig";
 import { useHoles } from "../holes/useHoles";
 import { Shell } from "../ui/Shell";

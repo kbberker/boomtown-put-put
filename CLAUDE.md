@@ -7,17 +7,20 @@
 - **Commands:** `pnpm test` (`vitest run`) for the suite, `pnpm build`
   (`tsc -b && vite build`) to typecheck + build, `pnpm lint` for eslint.
 - **Source layout (`src/`):** `App.tsx` holds the `<Routes>`; `Home.tsx` is the
-  entry point. Round feature lives in `src/round/` (`roundModel.ts`,
-  `NewRound.tsx`, `Scorecard.tsx`, `HoleEntry.tsx`); Hole config in
-  `src/holes/` (`holesConfig.ts`, `HoleSetup.tsx`). Tests sit next to source as
-  `*.test.ts(x)`.
+  entry point. Round feature lives in `src/round/` (`NewRound.tsx`,
+  `Scorecard.tsx`, `HoleEntry.tsx`); the Round domain shapes are in
+  `roundTypes.ts` and the logic lives in `src/round/utils/`
+  (`roster.ts`, `scoring.ts`, `ranking.ts`, `storage.ts`) behind an `index.ts`
+  barrel — import functions from `./utils`, types from `./roundTypes`. Hole
+  config in `src/holes/` (`holesConfig.ts`, `HoleSetup.tsx`). Tests sit next to
+  source as `*.test.ts(x)`.
 
 ## Domain model & persistence
 
 - **Routes:** `/` Home, `/holes` Hole Setup, `/new-round` New Round,
   `/scorecard` Scorecard (read-only hub), `/hole/:holeIndex` Hole Entry.
 - **Persistence (ADR-0001):** localStorage only, no backend, no Round history.
-  `roundModel.ts` owns the single active Round under key `putt-putt:round` via
+  `utils/storage.ts` owns the single active Round under key `putt-putt:round` via
   `saveRound`/`loadRound` (load returns `null` if absent/corrupt). Holes config
   persists separately in `holesConfig.ts`. There are 9 fixed Holes
   (`HOLE_COUNT`). A Score is a 1–9 integer (9 = picked up), `null` = not entered;

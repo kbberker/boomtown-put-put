@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router";
 import { Scorecard } from "./Scorecard";
-import { createRound, saveRound, setScore } from "./roundModel";
+import { createRound, saveRound, setScore } from "./utils";
 import { saveHoles, defaultHoles, HOLE_COUNT } from "../holes/holesConfig";
 
 const user = userEvent.setup();

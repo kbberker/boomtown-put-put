@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router";
 import { NewRound } from "./NewRound";
-import { createRound, loadRound, saveRound } from "./roundModel";
+import { createRound, loadRound, saveRound } from "./utils";
 
 const user = userEvent.setup();
 

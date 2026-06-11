@@ -1,11 +1,6 @@
 import { type CSSProperties } from "react";
 import { useNavigate } from "react-router";
-import {
-  loadRound,
-  clearRound,
-  rankPlayers,
-  isRoundComplete,
-} from "./roundModel";
+import { loadRound, clearRound, rankPlayers, isRoundComplete } from "./utils";
 import { Shell } from "../ui/Shell";
 import { Button } from "../ui/Button";
 import styles from "./Results.module.css";

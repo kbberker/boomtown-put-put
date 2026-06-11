@@ -1,49 +1,27 @@
 import { describe, it, expect } from "vitest";
 import {
-  createRound,
-  loadRound,
-  saveRound,
-  clearRound,
   setScore,
   isHoleScored,
+  totalFor,
   isRoundComplete,
   unscoredHoleCount,
-  rankPlayers,
-  totalFor,
   nextUnscoredHole,
-  MIN_PLAYERS,
-  MAX_PLAYERS,
-  MAX_NAME_LENGTH,
-} from "./roundModel";
-import { HOLE_COUNT } from "../holes/holesConfig";
+} from "./scoring";
+import { createRound } from "./roster";
+import { HOLE_COUNT } from "../../holes/holesConfig";
 
-describe("roundModel", () => {
-  it("exposes a roster size of 1 to 6 Players", () => {
-    expect(MIN_PLAYERS).toBe(1);
-    expect(MAX_PLAYERS).toBe(6);
+// Score every Player on every Hole so the Round counts as complete.
+function fullyScored(names: string[]): ReturnType<typeof createRound> {
+  let round = createRound(names);
+  round.players.forEach((_, p) => {
+    for (let h = 0; h < HOLE_COUNT; h++) {
+      round = setScore(round, p, h, 2);
+    }
   });
+  return round;
+}
 
-  it("creates a Round whose roster matches the given names", () => {
-    const round = createRound(["Alice", "Bob"]);
-    expect(round.players.map((p) => p.name)).toEqual(["Alice", "Bob"]);
-  });
-
-  it("trims Player names and permits duplicates, never truncating", () => {
-    const round = createRound([" Sam ", "Sam"]);
-    expect(round.players.map((p) => p.name)).toEqual(["Sam", "Sam"]);
-    // The model owns the cap as a rule but does not silently truncate names;
-    // an over-long name is stored verbatim (New Round blocks tee-off instead).
-    const long = "Bartholomewson";
-    expect(long.length).toBeGreaterThan(MAX_NAME_LENGTH);
-    expect(createRound([long]).players[0].name).toBe(long);
-  });
-
-  it("starts every Player with 9 blank Scores (not yet entered)", () => {
-    const round = createRound(["Alice"]);
-    expect(round.players[0].scores).toHaveLength(HOLE_COUNT);
-    expect(round.players[0].scores.every((s) => s === null)).toBe(true);
-  });
-
+describe("scoring", () => {
   it("reports a running Total of 0 for a Player with no Scores entered", () => {
     const round = createRound(["Alice"]);
     expect(totalFor(round.players[0])).toBe(0);
@@ -98,38 +76,6 @@ describe("roundModel", () => {
     expect(isHoleScored(round, 0)).toBe(true);
   });
 
-  it("persists and reloads the active Round", () => {
-    const round = createRound(["Alice", "Bob"]);
-    saveRound(round);
-    expect(loadRound()).toEqual(round);
-  });
-
-  it("returns null when no active Round is stored", () => {
-    expect(loadRound()).toBeNull();
-  });
-
-  it("returns null when the stored Round is corrupt", () => {
-    localStorage.setItem("putt-putt:round", "not json");
-    expect(loadRound()).toBeNull();
-  });
-
-  it("clears the active Round so a later load finds none", () => {
-    saveRound(createRound(["Alice"]));
-    clearRound();
-    expect(loadRound()).toBeNull();
-  });
-
-  // Score every Player on every Hole so the Round counts as complete.
-  function fullyScored(names: string[]): ReturnType<typeof createRound> {
-    let round = createRound(names);
-    round.players.forEach((_, p) => {
-      for (let h = 0; h < HOLE_COUNT; h++) {
-        round = setScore(round, p, h, 2);
-      }
-    });
-    return round;
-  }
-
   it("reports a Round complete only when every Player scored every Hole", () => {
     let round = createRound(["Alice", "Bob"]);
     expect(isRoundComplete(round)).toBe(false);
@@ -147,36 +93,6 @@ describe("roundModel", () => {
     round = setScore(round, 1, 0, 2);
     expect(unscoredHoleCount(round)).toBe(HOLE_COUNT - 1);
     expect(unscoredHoleCount(fullyScored(["Alice", "Bob"]))).toBe(0);
-  });
-
-  it("ranks Players by ascending Total", () => {
-    let round = createRound(["Alice", "Bob"]);
-    round = setScore(round, 0, 0, 5); // Alice total 5
-    round = setScore(round, 1, 0, 2); // Bob total 2
-    const ranked = rankPlayers(round);
-    expect(ranked.map((r) => r.player.name)).toEqual(["Bob", "Alice"]);
-    expect(ranked.map((r) => r.total)).toEqual([2, 5]);
-  });
-
-  it("declares the lowest Total the Winner in a complete Round", () => {
-    let round = fullyScored(["Alice", "Bob"]);
-    round = setScore(round, 1, 0, 1); // Bob one stroke better
-    const ranked = rankPlayers(round);
-    expect(ranked[0].player.name).toBe("Bob");
-    expect(ranked[0].isWinner).toBe(true);
-    expect(ranked[1].isWinner).toBe(false);
-  });
-
-  it("declares co-Winners on a tie with no tiebreaker", () => {
-    const round = fullyScored(["Alice", "Bob"]); // identical Scores -> tie
-    const winners = rankPlayers(round).filter((r) => r.isWinner);
-    expect(winners.map((r) => r.player.name).sort()).toEqual(["Alice", "Bob"]);
-  });
-
-  it("declares no Winner while the Round is incomplete", () => {
-    let round = createRound(["Alice", "Bob"]);
-    round = setScore(round, 0, 0, 1); // lowest, but Round not complete
-    expect(rankPlayers(round).every((r) => !r.isWinner)).toBe(true);
   });
 
   describe("nextUnscoredHole", () => {

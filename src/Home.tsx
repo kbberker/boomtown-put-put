@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { loadRound, nextUnscoredHole } from "./round/roundModel";
+import { loadRound, nextUnscoredHole } from "./round/utils";
 import { Shell } from "./ui/Shell";
 import { ButtonLink } from "./ui/Button";
 import logo from "./assets/boomtown-john-logo.png";

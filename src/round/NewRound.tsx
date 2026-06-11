@@ -7,7 +7,7 @@ import {
   MIN_PLAYERS,
   MAX_PLAYERS,
   MAX_NAME_LENGTH,
-} from "./roundModel";
+} from "./utils";
 import { Shell } from "../ui/Shell";
 import { ScreenHeader } from "../ui/ScreenHeader";
 import { Button } from "../ui/Button";
