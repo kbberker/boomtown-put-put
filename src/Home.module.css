@@ -1,8 +1,43 @@
+/*
+ * Below ~600px: a single vertical column (hero at top, actions anchored to the
+ * bottom). At/above ~600px: two columns — branding on the left, the resume strip
+ * and actions stacked on the right — reclaiming vertical space in short landscape
+ * viewports.
+ */
+.layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--bt-space-5);
+  }
+}
+
+/* Right column at/above the breakpoint: resume strip stacked over the actions. */
+.side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: 600px) {
+    justify-content: center;
+  }
+}
+
 .hero {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 56px;
+
+  @media (min-width: 600px) {
+    flex: 1;
+    justify-content: center;
+    padding-top: 0;
+  }
 }
 
 .logo {
@@ -95,4 +130,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--bt-space-3);
+
+  /* In the row layout the actions sit directly under the resume strip
+     (vertically centered by .side), not anchored to the column floor. */
+  @media (min-width: 600px) {
+    margin-top: 0;
+  }
 }
