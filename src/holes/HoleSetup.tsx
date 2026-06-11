@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { loadHoles, saveSharedHoles, type Hole } from "./holesConfig";
+import { saveSharedHoles, type Hole } from "./holesConfig";
+import { useHoles } from "./useHoles";
 import { Shell } from "../ui/Shell";
 import { ScreenHeader } from "../ui/ScreenHeader";
 import { Button } from "../ui/Button";
@@ -39,16 +40,33 @@ function isValid(draft: HoleDraft): boolean {
  */
 export function HoleSetup() {
   const navigate = useNavigate();
-  const [drafts, setDrafts] = useState<HoleDraft[]>(() =>
-    loadHoles().map(toDraft),
-  );
+  // Cache-first read of the shared course (ADR-0003): paints from the local
+  // cache instantly, then re-renders with the server course once it resolves so
+  // edits made on another device show up here on load/refresh.
+  const holes = useHoles();
+  const [drafts, setDrafts] = useState<HoleDraft[]>(() => holes.map(toDraft));
+  // The shared course the form was last seeded from, so an unchanged refresh is
+  // a no-op and only a genuinely different server course re-seeds the drafts.
+  const seeded = useRef(JSON.stringify(holes));
+  // Once the user edits a field we stop re-seeding, so a refresh that lands
+  // mid-edit can't clobber in-progress changes. (A refresh resolving in the same
+  // tick a user first types is a known, accepted narrow race.)
+  const dirty = useRef(false);
   const [pin, setPin] = useState(
     () => sessionStorage.getItem(PIN_SESSION_KEY) ?? "",
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    const next = JSON.stringify(holes);
+    if (next === seeded.current) return;
+    seeded.current = next;
+    if (!dirty.current) setDrafts(holes.map(toDraft));
+  }, [holes]);
+
   function updateHole(index: number, patch: Partial<HoleDraft>) {
+    dirty.current = true;
     setDrafts((current) =>
       current.map((draft, i) => (i === index ? { ...draft, ...patch } : draft)),
     );
@@ -59,13 +77,13 @@ export function HoleSetup() {
       setError("Every hole needs a name and a par of at least 1.");
       return;
     }
-    const holes = drafts.map((d) => ({
+    const holesToSave = drafts.map((d) => ({
       name: d.name.trim(),
       par: parsePar(d.par),
     }));
 
     setSaving(true);
-    const result = await saveSharedHoles(holes, pin);
+    const result = await saveSharedHoles(holesToSave, pin);
     setSaving(false);
 
     if (!result.ok) {
