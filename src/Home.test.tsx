@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Home } from "./Home";
-import { createRound, saveRound, setScore } from "./round/roundModel";
+import { createRound, saveRound, setScore } from "./round/utils";
 import { HOLE_COUNT } from "./holes/holesConfig";
 
 describe("Home", () => {

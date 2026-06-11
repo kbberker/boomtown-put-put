@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router";
 import { NewRound } from "./NewRound";
-import { createRound, loadRound, saveRound } from "./roundModel";
+import { createRound, loadRound, saveRound } from "./utils";
 
 const user = userEvent.setup();
 
@@ -102,6 +102,29 @@ describe("NewRound", () => {
     expect(screen.queryByText("SCORECARD")).toBeNull();
     expect(loadRound()).toBeNull();
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("warns and marks the field invalid when a name exceeds 12 characters", async () => {
+    renderNewRound();
+
+    await user.clear(playerInputs()[0]);
+    await user.type(playerInputs()[0], "Bartholomewson");
+
+    expect(playerInputs()[0]).toHaveValue("Bartholomewson");
+    expect(playerInputs()[0]).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText(/12 characters/i)).toBeInTheDocument();
+  });
+
+  it("blocks the tee-off and does not create a Round when a name is too long", async () => {
+    renderNewRound();
+
+    await user.clear(playerInputs()[0]);
+    await user.type(playerInputs()[0], "Bartholomewson");
+    await teeOff();
+
+    expect(screen.queryByText("SCORECARD")).toBeNull();
+    expect(loadRound()).toBeNull();
+    expect(screen.getAllByRole("alert").length).toBeGreaterThan(0);
   });
 
   it("confirms before discarding a Round in progress, then replaces it", async () => {

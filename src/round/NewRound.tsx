@@ -6,7 +6,8 @@ import {
   saveRound,
   MIN_PLAYERS,
   MAX_PLAYERS,
-} from "./roundModel";
+  MAX_NAME_LENGTH,
+} from "./utils";
 import { Shell } from "../ui/Shell";
 import { ScreenHeader } from "../ui/ScreenHeader";
 import { Button } from "../ui/Button";
@@ -17,6 +18,11 @@ const INITIAL_PLAYER_COUNT = 2;
 
 function defaultName(index: number): string {
   return `Player ${index + 1}`;
+}
+
+/** A name is too long once its trimmed length exceeds the model's cap. */
+function isNameTooLong(name: string): boolean {
+  return name.trim().length > MAX_NAME_LENGTH;
 }
 
 function initialNames(): string[] {
@@ -64,6 +70,10 @@ export function NewRound() {
       setError("Every Player needs a name.");
       return;
     }
+    if (names.some(isNameTooLong)) {
+      setError(`Names are capped at ${MAX_NAME_LENGTH} characters.`);
+      return;
+    }
     setError(null);
     // Only one Round is active at a time (ADR-0001). If one is in progress,
     // starting overwrites it, so confirm before discarding it.
@@ -96,7 +106,7 @@ export function NewRound() {
                 type="text"
                 required
                 aria-label={`Player ${index + 1} name`}
-                aria-invalid={name.trim() === ""}
+                aria-invalid={name.trim() === "" || isNameTooLong(name)}
                 value={name}
                 onChange={(e) => updateName(index, e.target.value)}
                 onFocus={(e) => e.currentTarget.select()}
@@ -110,6 +120,11 @@ export function NewRound() {
                 >
                   ✕
                 </button>
+              )}
+              {isNameTooLong(name) && (
+                <p role="alert" className={styles.fieldError}>
+                  Names are capped at {MAX_NAME_LENGTH} characters.
+                </p>
               )}
             </div>
           ))}
