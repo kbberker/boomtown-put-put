@@ -18,17 +18,17 @@ export function Home() {
         <div className={styles.hero}>
           <img
             src={logo}
-            alt="John, the Boomtown Put Put mascot"
+            alt="John, the Harbor Nine mascot"
             className={styles.logo}
           />
           <h1 className={styles.title}>
-            Boomtown
+            Harbor
             <br />
-            Put Put
+            Nine
           </h1>
           <p className={styles.kicker}>
             <span className={styles.rule} />
-            Backyard 9
+            Put Put
             <span className={styles.rule} />
           </p>
         </div>
