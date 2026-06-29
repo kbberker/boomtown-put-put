@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Formatting + typechecking…",
+            "command": "pnpm format && pnpm typecheck"
+          }
+        ]
+      }
+    ]
+  }
+}

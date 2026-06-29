@@ -58,7 +58,9 @@ describe("HoleSetup", () => {
     const shared = defaultHoles();
     shared[0] = { name: "The Windmill", par: 4 };
     let resolveFetch!: (r: Response) => void;
-    stubFetch(() => new Promise<Response>((resolve) => (resolveFetch = resolve)));
+    stubFetch(
+      () => new Promise<Response>((resolve) => (resolveFetch = resolve)),
+    );
     renderHoleSetup();
 
     const firstName = screen.getAllByLabelText(/hole name/i)[0];
