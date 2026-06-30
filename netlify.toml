@@ -3,8 +3,8 @@
   publish = "dist"
   functions = "netlify/functions"
 
-# Route /api/* to Netlify Functions. Scaffolding for the not-yet-existing
-# GET/PUT /api/holes endpoints (ADR-0003); functions land in later slices.
+# Route /api/* to Netlify Functions. Serves the GET/PUT /api/holes endpoints
+# (ADR-0003) implemented in netlify/functions/holes/holes.ts.
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
